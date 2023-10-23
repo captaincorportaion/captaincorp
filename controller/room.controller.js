@@ -1,12 +1,11 @@
 const Validator = require('validatorjs');
 const db = require("../config/db.config");
 const { Sequelize, Op } = require('sequelize');
+const Users = db.users;
 const roomAmenitie = db.room_amenities;
 const Media = db.media;
 const roomRules = db.room_rules;
 const Room = db.rooms;
-const Type = db.type;
-const Roomtype = db.roomsType
 const Houserules = db.houseRules;
 const Houseamenities = db.houseAmenities;
 
@@ -41,11 +40,12 @@ const getAllrules = async (req, res) => {
 
 //add new room
 const addRooms = async (req, res) => {
+    // console.log('req.body', req.body)
     //validation
     let validation = new Validator(req.body, {
         title: 'required|string',
         description: 'required|string',
-        type: 'required',
+        type: 'required|in:Any,Shared room,Private room,Student accommodation',
         bedRooms: 'required',
         address: 'required',
         bathRooms: 'required',
@@ -101,15 +101,6 @@ const addRooms = async (req, res) => {
             return RESPONSE.error(res, 1103)
         }
 
-        // if type is not in array formate then throw error
-        if (type && type.length < 0) {
-            return RESPONSE.error(res, 1103)
-        }
-
-        // upload image on server and get path for store in database
-
-        // console.log('mediaUrl', mediaUrl)
-        // console.log(req.files);
         let mediaImg;
         if (typeof req.files !== 'undefined' && req.files.length > 0) {
             if (req.files[0].fieldname == 'mediaUrl') {
@@ -132,6 +123,7 @@ const addRooms = async (req, res) => {
             bathRooms,
             address,
             tenant,
+            type,
             liveWith,
             prefereOccupation,
             availibility,
@@ -148,12 +140,20 @@ const addRooms = async (req, res) => {
 
         // create aminities in array of object formate for bulk create
         if (amenities != '' && typeof amenities != 'undefined') {
-            let amenitieData = JSON.parse(amenities).map((item) => {
+            let amenitieData = amenities.map((item) => {
+                // console.log('item', typeof (item))
                 return {
                     amenitieId: item,
                     roomId: newRoom.id,
                 }
             })
+            // let amenitieData = JSON.parse(amenities).map((item) => {
+            //     // console.log('item', typeof (item))
+            //     return {
+            //         amenitieId: item,
+            //         roomId: newRoom.id,
+            //     }
+            // })
             // console.log("amenitieData",amenitieData);
 
             const createAmenities = await roomAmenitie.bulkCreate(amenitieData, {
@@ -165,7 +165,7 @@ const addRooms = async (req, res) => {
 
         // create rules in array of object formate for bulk create
         if (rules != '' && typeof rules != 'undefined') {
-            let rulesData = JSON.parse(rules).map((item) => {
+            let rulesData = rules.map((item) => {
                 return {
                     rulesId: item,
                     roomId: newRoom.id,
@@ -177,23 +177,6 @@ const addRooms = async (req, res) => {
             });
             responseData.room_rules = createRules
         }
-
-        // create rules in array of object formate for bulk create
-        if (type != '' && typeof type != 'undefined') {
-            let typeData = JSON.parse(type).map((item) => {
-                return {
-                    typeId: item,
-                    roomId: newRoom.id,
-                }
-            })
-            // console.log('typeData', typeData)
-            // create bulk for aminities
-            const createType = await Roomtype.bulkCreate(typeData, {
-                returning: true
-            });
-            responseData.room_type = createType
-        }
-
 
         let mediaData = [];
 
@@ -261,23 +244,12 @@ const addRooms = async (req, res) => {
                             attributes: ['name', 'id']
                         }
                     ]
-                },
-                {
-                    model: Roomtype,
-                    as: 'roomType',
-                    include: [
-                        {
-                            model: Type,
-                            as: 'roomtype',
-                            attributes: ['name', 'id']
-                        }
-                    ]
                 }
             ],
         })
 
 
-        return RESPONSE.success(res, 1101, findRoom);
+        return RESPONSE.success(res, 1101);
     } catch (error) {
         console.log(error)
         return RESPONSE.error(res, error.message);
@@ -328,10 +300,6 @@ const updateRoom = async (req, res) => {
             return RESPONSE.error(res, 1103)
         }
 
-        // if type is not in array formate then throw error
-        if (type && type.length < 0) {
-            return RESPONSE.error(res, 1103)
-        }
 
         // upload image on server and get path for store in database
 
@@ -357,6 +325,7 @@ const updateRoom = async (req, res) => {
             bedRooms,
             bathRooms,
             tenant,
+            type,
             liveWith,
             prefereOccupation,
             availibility,
@@ -408,25 +377,6 @@ const updateRoom = async (req, res) => {
 
             const createRules = await roomRules.bulkCreate(rulesData);
             responseData.room_rules = createRules
-        }
-
-        // create rules in array of object formate for bulk create
-        if (type) {
-            // Delete existing room types associated with the room
-            await Roomtype.destroy({
-                where: { roomId }
-            });
-
-            // Create new room types
-            const typeData = JSON.parse(type).map((item) => {
-                return {
-                    typeId: item,
-                    roomId
-                }
-            });
-
-            const createType = await Roomtype.bulkCreate(typeData);
-            responseData.room_type = createType
         }
 
 
@@ -569,19 +519,9 @@ const getAllRooms = async (req, res) => {
                                 as: 'houserules'
                             }
                         ]
-                    },
-                    {
-                        model: Roomtype,
-                        as: 'roomType',
-                        include: [
-                            {
-                                model: Type,
-                                as: 'roomtype'
-                            }
-                        ],
-
                     }
                 ],
+                order: [['createdAt', 'DESC']]
             });
             return RESPONSE.success(res, 1104, rooms);
         }
@@ -644,24 +584,9 @@ const getAllRooms = async (req, res) => {
                             as: 'houserules'
                         }
                     ]
-                },
-                {
-                    model: Roomtype,
-                    as: 'roomType',
-                    include: [
-                        {
-                            model: Type,
-                            as: 'roomtype'
-                        }
-                    ],
-                    where: [
-                        {
-                            typeId: type
-                        }
-                    ]
                 }
-
             ],
+            order: [['createdAt', 'DESC']]
         });
 
         if (!rooms.length) {
@@ -708,17 +633,8 @@ const getRoom = async (req, res) => {
                         }
                     ]
                 },
-                {
-                    model: Roomtype,
-                    as: 'roomType',
-                    include: [
-                        {
-                            model: Type,
-                            as: 'roomtype'
-                        }
-                    ]
-                }
             ],
+            order: [['createdAt', 'DESC']]
         })
 
         return RESPONSE.success(res, 1104, event);
@@ -751,7 +667,8 @@ const getAllRoomsById = async (req, res) => {
                     include: [
                         {
                             model: Houseamenities,
-                            as: 'houseamenitie'
+                            as: 'houseamenitie',
+                            attributes: ['id', 'name', 'amenities_img'],
                         }
                     ]
                 },
@@ -761,19 +678,13 @@ const getAllRoomsById = async (req, res) => {
                     include: [
                         {
                             model: Houserules,
-                            as: 'houserules'
+                            as: 'houserules',
                         }
                     ]
                 },
                 {
-                    model: Roomtype,
-                    as: 'roomType',
-                    include: [
-                        {
-                            model: Type,
-                            as: 'roomtype'
-                        }
-                    ]
+                    model: Users,
+                    attributes: ['name', 'picture']
                 }
             ],
         });

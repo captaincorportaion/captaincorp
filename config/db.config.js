@@ -38,8 +38,6 @@ db.houseAmenities = require('../model/room/amenities.model')(sequelize, Sequeliz
 db.room_amenities = require('../model/room/roomAmenities.model')(sequelize, Sequelize)
 db.media = require('../model/media.model')(sequelize, Sequelize)
 db.room_rules = require('../model/room/roomRules.model')(sequelize, Sequelize)
-db.type = require('../model/room/type.model')(sequelize, Sequelize)
-db.roomsType = require('../model/room/roomType.model')(sequelize, Sequelize)
 db.houseRules = require('../model/room/rules.model')(sequelize, Sequelize)
 db.rooms = require('../model/room/room.model')(sequelize, Sequelize)
 
@@ -86,6 +84,9 @@ db.conversations_chat = require('../model/chat/conversations_chat.model')(sequel
 // db.room_amenities.belongsTo(db.rooms, { foreignKey: 'amenitieId' });
 
 //room
+db.users.hasMany(db.rooms, { foreignKey: 'user_id' });
+db.rooms.belongsTo(db.users, { foreignKey: 'user_id' });
+
 db.media.belongsTo(db.rooms, { foreignKey: "roomId" });
 db.rooms.hasMany(db.media, { foreignKey: "roomId" });
 
@@ -94,9 +95,6 @@ db.rooms.hasMany(db.room_amenities, { foreignKey: "roomId", as: 'roomAmenities' 
 
 db.room_rules.belongsTo(db.rooms, { foreignKey: 'roomId', as: 'roomRules' });
 db.rooms.hasMany(db.room_rules, { foreignKey: 'roomId', as: 'roomRules' });
-
-db.roomsType.belongsTo(db.rooms, { foreignKey: 'roomId', as: 'roomType' });
-db.rooms.hasMany(db.roomsType, { foreignKey: 'roomId', as: 'roomType' });
 
 db.rooms.hasMany(db.room_booking, { foreignKey: 'room_id' });
 db.room_booking.belongsTo(db.rooms, { foreignKey: 'room_id' });
@@ -109,9 +107,6 @@ db.room_rules.belongsTo(db.houseRules, { foreignKey: 'rulesId', as: 'houserules'
 
 db.houseAmenities.hasMany(db.room_amenities, { foreignKey: 'amenitieId', as: 'houseamenitie' });
 db.room_amenities.belongsTo(db.houseAmenities, { foreignKey: 'amenitieId', as: 'houseamenitie' });
-
-db.type.hasMany(db.roomsType, { foreignKey: 'typeId', as: 'roomtype' });
-db.roomsType.belongsTo(db.type, { foreignKey: 'typeId', as: 'roomtype' });
 
 
 //save post

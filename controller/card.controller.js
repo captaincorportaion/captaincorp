@@ -22,7 +22,7 @@ const addCard = async (req, res) => {
         const card = await Card.create({ user_id: authUser, card_number, cvc, expiry_month, expiry_year, cardholder_name });
 
 
-        return RESPONSE.success(res, 2401, card);
+        return RESPONSE.success(res, 2401);
     } catch (error) {
         console.log(error)
         return RESPONSE.error(res, error.message);

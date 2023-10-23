@@ -10,6 +10,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
+        icon_url: {
+            type: Sequelize.STRING,
+            allowNull: false
+        },
         createdAt: {
             field: 'created_at',
             type: Sequelize.DATE,

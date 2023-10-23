@@ -15,6 +15,10 @@ module.exports = (sequelize, Sequelize) => {
                 key: 'id'
             }
         },
+        is_save: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
         title: {
             type: Sequelize.STRING(200),
             allowNull: true,
@@ -48,6 +52,11 @@ module.exports = (sequelize, Sequelize) => {
         prefereOccupation: {
             type: Sequelize.STRING,
             enum: ['Student', 'Employee', 'Worker'],
+            allowNull: false
+        },
+        type: {
+            type: Sequelize.STRING,
+            enum: ['Any', 'Shared room', 'Private room', 'Student accommodation'],
             allowNull: false
         },
         availibility: {

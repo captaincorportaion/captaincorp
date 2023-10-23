@@ -11,6 +11,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(200),
             allowNull: true,
         },
+        title: {
+            type: Sequelize.STRING(200),
+            allowNull: true,
+        },
         active: {
             type: Sequelize.INTEGER(2),
             allowNull: false,

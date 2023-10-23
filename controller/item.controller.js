@@ -5,6 +5,7 @@ const { UploadFiles } = require('../helpers/file')
 
 
 //...................models............
+const Users = db.users;
 const Item_categories = db.items_categories;
 const Items = db.items;
 const Items_photos = db.item_photos;
@@ -23,6 +24,7 @@ const addItem = async (req, res) => {
         price_duration: 'required_if:item_type,Rent|in:per day',
         security_deposite: 'required_if:item_type,Rent',
         lat: 'required',
+        address: 'required',
         long: 'required',
         item_category_id: 'required',
     });
@@ -31,11 +33,11 @@ const addItem = async (req, res) => {
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
     try {
-        const { item_type, title, description, price, city, price_duration, security_deposite, lat, long, item_category_id } = req.body;
+        const { item_type, title, description, price, address, city, price_duration, security_deposite, lat, long, item_category_id } = req.body;
 
         const authUser = req.user.id;
 
-        const itemData = await Items.create({ user_id: authUser, item_type, title, description, price, city, price_duration, security_deposite, lat, long, item_category_id });
+        const itemData = await Items.create({ user_id: authUser, item_type, title, address, description, price, city, price_duration, security_deposite, lat, long, item_category_id });
 
         //..................upload photo....
         if (itemData) {
@@ -66,7 +68,7 @@ const addItem = async (req, res) => {
             ],
         });
 
-        return RESPONSE.success(res, 2101, findItem);
+        return RESPONSE.success(res, 2101);
     } catch (error) {
         console.log(error)
         return RESPONSE.error(res, error.message);
@@ -79,7 +81,7 @@ const updateItem = async (req, res) => {
     try {
         const authUser = req.user.id;
         const itemId = req.params.id;
-        const { title, description, price, city, price_duration, security_deposite, lat, long, item_category_id } = req.body;
+        const { title, description, price, city, price_duration, security_deposite, lat, long, item_category_id, address } = req.body;
 
         // console.log('eventId', eventId)
 
@@ -89,7 +91,7 @@ const updateItem = async (req, res) => {
         }
 
         const itemData = await item.update(
-            { title, description, price, city, price_duration, security_deposite, lat, long, item_category_id },
+            { title, description, price, city, price_duration, security_deposite, lat, long, item_category_id, address },
 
         );
 
@@ -252,6 +254,7 @@ const getAllRentAndSale = async (req, res) => {
                     attributes: ['name', 'id']
                 },
             ],
+            order: [['createdAt', 'DESC']]
         });
 
         if (!findAllData.length) {
@@ -293,6 +296,10 @@ const getRentAndSaleById = async (req, res) => {
                         model: Item_categories,
                         attributes: ['name', 'id']
                     },
+                    {
+                        model: Users,
+                        attributes: ['name', 'picture']
+                    }
                 ],
             })
 

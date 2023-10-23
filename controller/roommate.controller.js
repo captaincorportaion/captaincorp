@@ -10,10 +10,9 @@ const Users = db.users;
 const Roommate_media = db.roommate_media;
 const Roommate_social = db.roommate_socials;
 const Roommate_interests = db.roommate_interests;
-
-const Lifestyle = db.lifestyle
-const SelectedSocial = db.selectedSocials
-const SelectedInterest = db.selectedInterest
+const Lifestyle = db.lifestyle;
+const SelectedSocial = db.selectedSocials;
+const SelectedInterest = db.selectedInterest;
 const SelectedLifestyle = db.selectedLifestyle;
 const Roommate_booking = db.roommate_booking;
 
@@ -36,7 +35,6 @@ const getAllLifestyle = async (req, res) => {
 const getAllSocialmedia = async (req, res) => {
     try {
         const selectedSocial = await Roommate_social.findAll();
-
         return RESPONSE.success(res, 2207, selectedSocial);
     } catch (error) {
         console.log(error)
@@ -61,7 +59,6 @@ const addRoommate = async (req, res) => {
         city: 'required|string',
         lat: 'required',
         long: 'required',
-        address: 'required',
         gender: 'required|in:Male,Female,Other',
         age: 'required|numeric',
         Occupation: 'required|string',
@@ -72,86 +69,63 @@ const addRoommate = async (req, res) => {
         bathrooms: 'required|numeric',
         bedrooms: 'required|numeric',
         no_of_roommates: 'required|numeric',
-        required_roommate: 'required|numeric',
         marital_status: 'required|in:Single,Married',
         gender_preference: 'required|in:Male,Female,Other',
         preference_food_choice: 'required|in:Vegetarian,Non-Vegetarian',
         preference_age: 'required|in:12-18 Year,18-35 Year,35-50 Year',
-        lifestyle: 'required|in:Pet Friendly,Non-smoker',
         message: 'required|string',
         interest_id: 'required|array',
         social_id: 'required|array',
         lifestyle_id: 'required|array',
-
+        address: 'required|string'
     });
     if (validation.fails()) {
         firstMessage = Object.keys(validation.errors.all())[0];
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
-
     try {
-        const { city, lat, long, address, gender, age, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, required_roommate, marital_status, gender_preference, preference_food_choice, preference_age, lifestyle, interest_id, social_id, lifestyle_id, message } = req.body;
-
+        const { city, lat, long, address, gender, age, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, marital_status, gender_preference, preference_food_choice, preference_age, interest_id, social_id, lifestyle_id, message } = req.body;
         const authUser = req.user.id
-
-
-        let photo = [];
-        if (typeof req.files !== 'undefined' && req.files.length > 0) {
-
-            const data = req.files.filter((item) => item.fieldname == "image")
-            // if (data.length > 1) {
-            //     return RESPONSE.error(res, 2202)
-            // }
-
-            photo = await UploadFiles(data, 'images/roommate_media', 'image');
-        }
-
-        const addRoommate = await Roommate.create({ user_id: authUser, image: photo[0], city, lat, long, address, gender, age, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, required_roommate, marital_status, gender_preference, preference_food_choice, preference_age, lifestyle, message })
+        const addRoommate = await Roommate.create({ user_id: authUser, city, lat, long, address, gender, age, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, marital_status, gender_preference, preference_food_choice, preference_age, message })
         if (addRoommate) {
-
             for (const selectedInterest of interest_id) {
                 await SelectedInterest.create({
                     roommate_id: addRoommate.id,
                     interest_id: selectedInterest
                 });
             }
-
             for (const selectedSocial of social_id) {
                 await SelectedSocial.create({
                     roommate_id: addRoommate.id,
                     social_id: selectedSocial
                 });
             }
-
             for (const selectedLifestyle of lifestyle_id) {
                 await SelectedLifestyle.create({
                     roommate_id: addRoommate.id,
                     lifestyle_id: selectedLifestyle
                 });
             }
-
             //.................upload media ..............
             let mediaUrl = [];
             if (typeof req.files !== 'undefined' && req.files.length > 0) {
                 mediaUrl = await uploadRoommateFiles(req.files, 'images/roommate_media');
             }
-
-            for (const image of mediaUrl) {
+            for (const i of mediaUrl) {
                 await Roommate_media.create({
                     roommate_id: addRoommate.id,
-                    media: image,
+                    media: i.roommate_media,
+                    media_type: i.media_type
                 })
             }
         }
-
         const findRoommate = await Roommate.findOne({
             where: { id: addRoommate.id },
             include: [
                 {
                     model: Roommate_media,
-                    attributes: ['media', 'id']
+                    attributes: ['media', 'id', 'media_type']
                 },
-
                 {
                     model: SelectedInterest,
                     attributes: ['interest_id', 'id'],
@@ -162,14 +136,13 @@ const addRoommate = async (req, res) => {
                         }
                     ],
                 },
-
                 {
                     model: SelectedSocial,
                     attributes: ['social_id', 'id'],
                     include: [
                         {
                             model: Roommate_social,
-                            attributes: ['name', 'icon_url', 'id']
+                            attributes: ['name', 'id']
                         }
                     ],
                 },
@@ -190,16 +163,12 @@ const addRoommate = async (req, res) => {
                 }
             ],
         });
-
-
-
         return RESPONSE.success(res, 2201, findRoommate);
     } catch (error) {
         console.log(error)
         return RESPONSE.error(res, error.message);
     }
 }
-
 
 //...............add roommate...............
 const updateRoommate = async (req, res) => {
@@ -397,7 +366,8 @@ const getAllRoommate = async (req, res) => {
             condition.city = city;
         }
         if (age) {
-            condition.age = age;
+            const [min_age, max_age] = age.split('-')
+            condition.age = { [Op.gte]: min_age, [Op.lte]: max_age };
         }
         if (minimum_stay) {
             condition.minimum_stay = minimum_stay;
@@ -406,6 +376,7 @@ const getAllRoommate = async (req, res) => {
         if (bedrooms) {
             condition.bedrooms = bedrooms;
         }
+
         if (bathrooms) {
             condition.bathrooms = bathrooms;
         }
@@ -460,9 +431,10 @@ const getAllRoommate = async (req, res) => {
                 },
                 {
                     model: Users,
-                    attributes: ['name']
+                    attributes: ['name', 'picture']
                 }
-            ]
+            ],
+            order: [['createdAt', 'DESC']]
         });
 
 
@@ -533,7 +505,7 @@ const getRoommateById = async (req, res) => {
                 },
                 {
                     model: Users,
-                    attributes: ['name', 'address']
+                    attributes: ['name', 'address', 'picture']
                 }
             ],
         });
@@ -555,7 +527,7 @@ const getRoommate = async (req, res) => {
     try {
         const { user: { id } } = req;
 
-        const findData = await Roommate.findOne({
+        const findData = await Roommate.findAll({
             where: { user_id: id },
             include: [
                 {
@@ -600,6 +572,7 @@ const getRoommate = async (req, res) => {
                     attributes: ['name']
                 }
             ],
+            order: [['createdAt', 'DESC']]
         });
 
         if (!findData) {

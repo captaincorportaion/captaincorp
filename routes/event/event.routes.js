@@ -25,6 +25,8 @@ router.delete('/delete-event/:id', Auth.authUser, eventController.deleteEvent)
 
 router.get('/get-All-events', Auth.authUser, eventController.getAllEvents);
 
+router.get('/get-event-by-id', eventController.getAllEventsById);
+
 router.get('/get-event-with-filter', Auth.authUser, eventController.getEventWithFilter)
 
 

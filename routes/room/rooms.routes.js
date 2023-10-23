@@ -1,7 +1,6 @@
 const router = require('express').Router()
 
 const roomController = require('../../controller/room.controller');
-const roomTypeController = require('../../controller/roomType.controller');
 const roomBookingController = require('../../controller/room_booking.controller');
 
 const checkAuth = require('../../middleware/checkAuth')
@@ -15,8 +14,6 @@ router.delete("/delete-room-media", checkAuth.authUser, roomController.deleteMed
 router.delete("/delete-room/:id", checkAuth.authUser, roomController.deleteRoom);
 router.get("/get-room", checkAuth.authUser, roomController.getRoom);
 router.post('/booking-room', checkAuth.authUser, roomBookingController.bookingRoom)
-//rooms type
-router.get("/get-roomType", roomTypeController.getAllType);
 
 //amenities
 router.get("/get-amenities", roomController.getAllamenities);

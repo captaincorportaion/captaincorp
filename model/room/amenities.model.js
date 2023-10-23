@@ -11,6 +11,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(200),
             allowNull: true,
         },
+        amenities_img: {
+            type: Sequelize.STRING(255),
+            allowNull: true,
+        },
         active: {
             type: Sequelize.INTEGER(2),
             allowNull: false,

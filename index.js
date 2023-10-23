@@ -8,9 +8,7 @@ const config = require('./config/config')
 const multer = require('multer')
 const upload = multer();
 const path = require('path')
-const {
-    Server
-} = require('socket.io')
+const { Server } = require('socket.io')
 const socketController = require('./controller/chat.controller.js')
 
 
@@ -18,20 +16,14 @@ app.use(upload.any())
 app.use(cors());
 // app.use(fileUpload());
 app.use(express.json());
-app.use(express.urlencoded({
-    extended: false
-}));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')))
 
 //user routes
 const userRoutes = require('./routes/index.js')
 app.use('/api/v1', userRoutes);
 
-app.get('/', (req, res) => {
-    res.send({
-        message: "Success"
-    })
-})
+
 
 //Server
 let server;
@@ -58,7 +50,7 @@ io.use(socketController.socketAuth);
 socketController.socketEvent(io);
 
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 server.listen(port, () => {
     console.log(`Server running on ${port}.`);
 });

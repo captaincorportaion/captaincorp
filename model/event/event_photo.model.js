@@ -16,9 +16,13 @@ module.exports = (sequelize, Sequelize) => {
         photo: {
             type: Sequelize.TEXT,
             allowNull: false,
-            get() {
-                const rawValue = this.getDataValue('photo');
-                return rawValue ? ASSETS.getMediaUrl(rawValue, "event_images") : null;
+            // get() {
+            //     const rawValue = this.getDataValue('photo');
+            //     return rawValue ? ASSETS.getMediaUrl(rawValue, "event_images") : null;
+            // }
+            get: function (val) {
+                return `https://www.bandbaajabarat.com/images/vendors/1630865366screenshot-1075.png`
+                // return `${process.env.BACKEND_URL}/${val}`
             }
         },
         createdAt: {

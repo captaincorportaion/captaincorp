@@ -1,15 +1,15 @@
 module.exports = (sequelize, Sequelize) => {
-    const roommateMedial = sequelize.define('roommate_medias', {
+    const roommateMedial = sequelize.define('room_medias', {
         id: {
             type: Sequelize.BIGINT.UNSIGNED,
             autoIncrement: true,
             allowNull: false,
             primaryKey: true,
         },
-        // media_type: {
-        //     type: Sequelize.INTEGER,
-        //     enum: [1, 2], //1 = photo , 2 = video
-        // },
+        media_type: {
+            type: Sequelize.INTEGER,
+            enum: [1, 2], //1 = photo , 2 = video
+        },
         roommate_id: {
             type: Sequelize.BIGINT.UNSIGNED,
             references: {
@@ -20,19 +20,15 @@ module.exports = (sequelize, Sequelize) => {
         media: {
             type: Sequelize.STRING,
             allowNull: true,
-            get() {
-                const rawValue = this.getDataValue('media');
-                return rawValue ? ASSETS.getMediaUrl(rawValue, "roommate_media") : null;
+            // get() {
+            //     const rawValue = this.getDataValue('media');
+            //     return rawValue ? ASSETS.getMediaUrl(rawValue, "roommate_media") : null;
+            // }
+            get: function (val) {
+                return `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHO7H7rzu9mGq5t0wRo79Z_2_Y4H_FKpyrpSjzD58ZroLaU6iqxqyLTnF8u5Nv3gfyeCg&usqp=CAU`
+                // return `${process.env.BACKEND_URL}/${val}`
             }
         },
-        // video: {
-        //     type: Sequelize.TEXT,
-        //     allowNull: true,
-        //     // get() {
-        //     //     const rawValue = this.getDataValue('video');
-        //     //     return rawValue ? ASSETS.getProfileUrl(rawValue) : null;
-        //     // }
-        // },
         createdAt: {
             field: 'created_at',
             type: Sequelize.DATE,
@@ -49,7 +45,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true,
         },
     }, {
-        tableName: 'roommate_medias',
+        tableName: 'room_medias',
         paranoid: "true"
     });
     return roommateMedial

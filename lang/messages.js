@@ -14,6 +14,8 @@ const MESSAGES = {
     '1012': "Request not found",
     '1013': "Select valid type",
     '1014': "ConverSation not found",
+    '1015': "Update profile successfully",
+    '1016': "get profile successfully",
 
     //ROOM
     '1101': "Added room successfully",
@@ -29,9 +31,16 @@ const MESSAGES = {
     '1111': 'You are Already Book Room',
 
     //saved post
-    '1201': "post is saved",
+    '1201': "Room unsaved successfully",
     '1202': "get all posts",
     '1203': "post not found!",
+    '1204': "Room saved successfully",
+    '1205': "Event unsaved successfully",
+    '1206': "Event saved successfully",
+    '1207': "Roommate unsaved successfully",
+    '1208': "Roommate saved successfully",
+    '1209': "Item unsaved successfully",
+    '1210': "Item saved successfully",
 
 
     //event 
@@ -58,7 +67,7 @@ const MESSAGES = {
     '2109': 'item update successfully..',
 
     //roommate
-    '2201': 'Add roommate  successfully..',
+    '2201': 'Add roommate successfully..',
     '2202': 'You can upload only one image',
     '2203': 'Get roommate successfully',
     '2204': 'roommate data not found',

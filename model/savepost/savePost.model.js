@@ -46,6 +46,11 @@ module.exports = (sequelize, Sequelize) => {
                 key: 'id'
             }
         },
+        post_category: {
+            type: Sequelize.STRING,
+            enum: ['Room', 'Event', 'Item', 'Roommate'],
+            allowNull: true
+        },
         createdAt: {
             field: 'created_at',
             type: Sequelize.DATE,
