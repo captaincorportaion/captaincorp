@@ -22,7 +22,9 @@ app.use(express.static(path.join(__dirname, 'public')))
 //user routes
 const userRoutes = require('./routes/index.js')
 app.use('/api/v1', userRoutes);
-
+app.get('/',(req,res)=>{
+    res.json({status:true,message:"App running!"})
+})
 
 
 //Server
