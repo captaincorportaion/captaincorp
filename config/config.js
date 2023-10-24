@@ -2,7 +2,7 @@ require('dotenv').config();
 
 module.exports = {
 
-    protocol: process.env.PROTOCOL || 'http',
+    protocol: process.env.PROTOCOL || 'https',
     appPath: process.env.APPPATH,
     database: {
         database: process.env.DB_DATABASE || 'captaincorportaion',

@@ -18,13 +18,9 @@ module.exports = (sequelize, Sequelize) => {
         url: {
             type: Sequelize.STRING(200),
             allowNull: true,
-            // get() {
-            //     const rawValue = this.getDataValue('url');
-            //     return rawValue ? ASSETS.getProfileUrl(rawValue) : null;
-            // }
-            get: function (val) {
-                return `https://media.istockphoto.com/id/1444437242/photo/side-view-of-elegant-bedroom-interior-with-double-bed-television-set-night-table-and-seaview.jpg?s=612x612&w=0&k=20&c=rvg5KUXPKIMY4I1g0by2Rpr0Cj4sCo-228M5LU-OPmE=`
-                // return `${process.env.BACKEND_URL}/${val}`
+            get() {
+                const rawValue = this.getDataValue('url');
+                return rawValue ? ASSETS.getProfileUrl(rawValue) : null;
             }
         },
         type: {

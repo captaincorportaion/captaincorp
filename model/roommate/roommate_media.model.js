@@ -20,13 +20,9 @@ module.exports = (sequelize, Sequelize) => {
         media: {
             type: Sequelize.STRING,
             allowNull: true,
-            // get() {
-            //     const rawValue = this.getDataValue('media');
-            //     return rawValue ? ASSETS.getMediaUrl(rawValue, "roommate_media") : null;
-            // }
-            get: function (val) {
-                return `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHO7H7rzu9mGq5t0wRo79Z_2_Y4H_FKpyrpSjzD58ZroLaU6iqxqyLTnF8u5Nv3gfyeCg&usqp=CAU`
-                // return `${process.env.BACKEND_URL}/${val}`
+            get() {
+                const rawValue = this.getDataValue('media');
+                return rawValue ? ASSETS.getMediaUrl(rawValue, "roommate_media") : null;
             }
         },
         createdAt: {

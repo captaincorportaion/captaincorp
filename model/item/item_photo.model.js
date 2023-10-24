@@ -16,13 +16,9 @@ module.exports = (sequelize, Sequelize) => {
         photo: {
             type: Sequelize.TEXT,
             allowNull: false,
-            // get() {
-            //     const rawValue = this.getDataValue('photo');
-            //     return rawValue ? ASSETS.getMediaUrl(rawValue, "item_images") : null;
-            // }
-            get: function (val) {
-                return `https://hips.hearstapps.com/hmg-prod/images/dw-burnett-pcoty22-8260-1671143390.jpg`
-                // return `${process.env.BACKEND_URL}/${val}`
+            get() {
+                const rawValue = this.getDataValue('photo');
+                return rawValue ? ASSETS.getMediaUrl(rawValue, "item_images") : null;
             }
         },
         createdAt: {
