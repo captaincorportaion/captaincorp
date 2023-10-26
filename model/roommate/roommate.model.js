@@ -70,10 +70,6 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false,
         },
-        is_save: {
-            type: Sequelize.BOOLEAN,
-            defaultValue: false
-        },
         no_of_roommates: {
             type: Sequelize.INTEGER,
             allowNull: false,

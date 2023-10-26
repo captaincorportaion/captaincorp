@@ -11,6 +11,7 @@ const Items = db.items;
 const Items_photos = db.item_photos;
 const Rent_item_booking = db.rent_item_booking;
 const Sale_item_booking = db.sale_item_booking;
+const SavedPost = db.saves
 
 
 //..............add item for sale & rent.................
@@ -224,6 +225,8 @@ const getAllRentAndSale = async (req, res) => {
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
     try {
+        const { user: { id } } = req;
+
         const { item_type, item_category_id, city, min_budget, max_budget } = req.query;
 
         let condition = {
@@ -256,6 +259,12 @@ const getAllRentAndSale = async (req, res) => {
             ],
             order: [['createdAt', 'DESC']]
         });
+        for (const item of findAllData) {
+            const isSaved = await SavedPost.findOne({
+                where: { user_id: id, itemId: item.id }
+            });
+            item.dataValues.isSaved = isSaved !== null;
+        }
 
         if (!findAllData.length) {
             return RESPONSE.error(res, 2105);
@@ -274,7 +283,7 @@ const getAllRentAndSale = async (req, res) => {
 const getRentAndSaleById = async (req, res) => {
     let validation = new Validator(req.query, {
         item_type: 'required|in:Rent,Sale',
-        id: 'required'
+        ids: 'required'
     });
     if (validation.fails()) {
         firstMessage = Object.keys(validation.errors.all())[0];
@@ -282,11 +291,11 @@ const getRentAndSaleById = async (req, res) => {
     }
 
     try {
-        const { item_type, id } = req.query;
-
+        const { item_type, ids } = req.query;
+        const { user: { id } } = req
         const findData = await Items.findOne(
             {
-                where: { id: id, item_type: item_type },
+                where: { id: ids, item_type: item_type },
                 include: [
                     {
                         model: Items_photos,
@@ -305,6 +314,15 @@ const getRentAndSaleById = async (req, res) => {
 
         if (!findData) {
             return RESPONSE.error(res, 2105);
+        }
+        const isSaved = await SavedPost.findOne({
+            where: { user_id: id, itemId: ids }
+        });
+
+        if (isSaved) {
+            findData.dataValues.isSaved = true;
+        } else {
+            findData.dataValues.isSaved = false;
         }
 
         return RESPONSE.success(res, 2104, findData);

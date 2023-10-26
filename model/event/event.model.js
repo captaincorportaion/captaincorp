@@ -14,10 +14,6 @@ module.exports = (sequelize, Sequelize) => {
                 key: 'id'
             }
         },
-        is_save: {
-            type: Sequelize.BOOLEAN,
-            defaultValue: false
-        },
         event_title: {
             type: Sequelize.STRING,
             allowNull: false

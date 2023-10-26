@@ -15,6 +15,7 @@ const SelectedSocial = db.selectedSocials;
 const SelectedInterest = db.selectedInterest;
 const SelectedLifestyle = db.selectedLifestyle;
 const Roommate_booking = db.roommate_booking;
+const SavedPost = db.saves
 
 const { uploadRoommateFiles, UploadFiles } = require('../helpers/file')
 
@@ -358,7 +359,7 @@ const getAllRoommate = async (req, res) => {
     }
     try {
         const { city, age, minimum_stay, min_budget, max_budget, bedrooms, bathrooms, no_of_roommates, gender, food_choice, lifestyle } = req.query;
-
+        const { user: { id } } = req;
         let condition = {}
         let lifeStyleCondition = {}
 
@@ -432,10 +433,16 @@ const getAllRoommate = async (req, res) => {
                 {
                     model: Users,
                     attributes: ['name', 'picture']
-                }
+                },
             ],
             order: [['createdAt', 'DESC']]
         });
+        for (const roommate of findData) {
+            const isSaved = await SavedPost.findOne({
+                where: { user_id: id, roommateId: roommate.id }
+            });
+            roommate.dataValues.isSaved = isSaved !== null;
+        }
 
 
         if (!findData.length) {
@@ -454,17 +461,18 @@ const getAllRoommate = async (req, res) => {
 //.................get roommate by id........................
 const getRoommateById = async (req, res) => {
     let validation = new Validator(req.query, {
-        id: 'required'
+        ids: 'required'
     });
     if (validation.fails()) {
         firstMessage = Object.keys(validation.errors.all())[0];
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
     try {
-        const { id } = req.query;
+        const { ids } = req.query;
+        const { user: { id } } = req
 
-        const findData = await Roommate.findOne({
-            where: { id: id },
+        const findDatas = await Roommate.findOne({
+            where: { id: ids },
             include: [
                 {
                     model: Roommate_media,
@@ -510,11 +518,27 @@ const getRoommateById = async (req, res) => {
             ],
         });
 
-        if (!findData) {
+
+        if (!findDatas) {
             return RESPONSE.error(res, 2204);
         }
 
-        return RESPONSE.success(res, 2203, findData);
+        // const isSaved = await SavedPost.findOne({
+        //     where: { user_id: id, roommateId: findDatas.id }
+        // });
+        // findDatas.dataValues.isSaved = isSaved !== null;
+        const isSaved = await SavedPost.findOne({
+            where: { user_id: id, roommateId: ids }
+        });
+
+        if (isSaved) {
+            findDatas.dataValues.isSaved = true;
+        } else {
+            findDatas.dataValues.isSaved = false;
+        }
+
+
+        return RESPONSE.success(res, 2203, findDatas);
     } catch (error) {
         console.log(error)
         return RESPONSE.error(res, error.message);

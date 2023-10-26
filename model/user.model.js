@@ -42,14 +42,14 @@ module.exports = (sequelize, Sequelize) => {
         picture: {
             type: Sequelize.STRING(255),
             allowNull: true,
-            // get() {
-            //     const rawValue = this.getDataValue('picture');
-            //     return typeof rawValue === 'string' ? ASSETS.getProfileUrl(rawValue) : null;
-            // }
-            get: function (val) {
-                return `https://img.freepik.com/free-photo/close-up-portrait-young-bearded-man-white-shirt-jacket-posing-camera-with-broad-smile-isolated-gray_171337-629.jpg?size=626&ext=jpg&ga=GA1.1.2008272138.1696896000&semt=ais`
-                // return `${process.env.BACKEND_URL}/${val}`
+            get() {
+                const rawValue = this.getDataValue('picture');
+                return typeof rawValue === 'string' ? ASSETS.getProfileUrl(rawValue) : null;
             }
+            // get: function (val) {
+            //     return `https://img.freepik.com/free-photo/close-up-portrait-young-bearded-man-white-shirt-jacket-posing-camera-with-broad-smile-isolated-gray_171337-629.jpg?size=626&ext=jpg&ga=GA1.1.2008272138.1696896000&semt=ais`
+            //     // return `${process.env.BACKEND_URL}/${val}`
+            // }
         },
         active: {
             type: Sequelize.INTEGER(2),

@@ -1,6 +1,8 @@
 const Validator = require('validatorjs');
 const db = require("../config/db.config");
+const { where } = require('sequelize');
 // const db = require('../models'); 
+const Users = db.users;
 const Save = db.saves;
 const Room = db.rooms;
 const Event = db.event;
@@ -18,9 +20,9 @@ const Event_amenities = db.event_amenities;
 const Roommate_media = db.roommate_media;
 const Roommate_social = db.roommate_socials;
 const Roommate_interests = db.roommate_interests;
-const Lifestyle = db.lifestyle
-const SelectedSocial = db.selectedSocials
-const SelectedInterest = db.selectedInterest
+const Lifestyle = db.lifestyle;
+const SelectedSocial = db.selectedSocials;
+const SelectedInterest = db.selectedInterest;
 const SelectedLifestyle = db.selectedLifestyle;
 const Item_categories = db.items_categories;
 const Items_photos = db.item_photos;
@@ -31,27 +33,24 @@ const savePost = async (req, res) => {
     try {
         const { user: { id }, body: { roomId, eventId, roommateId, itemId } } = req;
 
-        // const post = await Save.create({ user_id: id, roomId, eventId, roommateId, itemId })
         if (roomId) {
 
             const existingSavedRoom = await Save.findOne({ where: { user_id: id, roomId } });
 
             if (existingSavedRoom) {
-
-                await Room.update(
-                    { is_save: false },
-                    { where: { id: roomId } }
-                );
-                await Save.destroy({ where: { user_id: id, roomId } });
-                return RESPONSE.success(res, 1201);
+                const post = await Save.destroy({ where: { user_id: id, roomId } });
+                const posts = {
+                    post,
+                    isSaved: false
+                }
+                return RESPONSE.success(res, 1201, posts);
             } else {
-
                 const post = await Save.create({ user_id: id, roomId, post_category: "Room" });
-                await Room.update(
-                    { is_save: true },
-                    { where: { id: roomId } }
-                );
-                return RESPONSE.success(res, 1204, post);
+                const posts = {
+                    post,
+                    isSaved: true
+                }
+                return RESPONSE.success(res, 1204, posts);
             }
 
         }
@@ -60,21 +59,19 @@ const savePost = async (req, res) => {
             const existingSavedEvent = await Save.findOne({ where: { user_id: id, eventId } });
 
             if (existingSavedEvent) {
-
-                await Event.update(
-                    { is_save: false },
-                    { where: { id: eventId } }
-                );
-                await Save.destroy({ where: { user_id: id, eventId } });
-                return RESPONSE.success(res, 1205);
+                const post = await Save.destroy({ where: { user_id: id, eventId } });
+                const posts = {
+                    post,
+                    isSaved: false
+                }
+                return RESPONSE.success(res, 1205, posts);
             } else {
-
                 const post = await Save.create({ user_id: id, eventId, post_category: "Event" });
-                await Event.update(
-                    { is_save: true },
-                    { where: { id: eventId } }
-                );
-                return RESPONSE.success(res, 1206, post);
+                const posts = {
+                    post,
+                    isSaved: true
+                }
+                return RESPONSE.success(res, 1206, posts);
             }
         }
         if (roommateId) {
@@ -82,46 +79,110 @@ const savePost = async (req, res) => {
             const existingSavedRoommte = await Save.findOne({ where: { user_id: id, roommateId } });
 
             if (existingSavedRoommte) {
-
-                await Roommate.update(
-                    { is_save: false },
-                    { where: { id: roommateId } }
-                );
-                await Save.destroy({ where: { user_id: id, roommateId } });
-                return RESPONSE.success(res, 1207);
+                const post = await Save.destroy({ where: { user_id: id, roommateId } });
+                const posts = {
+                    post,
+                    isSaved: false
+                }
+                return RESPONSE.success(res, 1207, posts);
             } else {
                 const post = await Save.create({ user_id: id, roommateId, post_category: "Roommate" });
-                await Roommate.update(
-                    { is_save: true },
-                    { where: { id: roommateId } }
-                );
-                return RESPONSE.success(res, 1208, post);
+                const posts = {
+                    post,
+                    isSaved: true
+                }
+                return RESPONSE.success(res, 1208, posts);
             }
         }
         if (itemId) {
             const existingSavedItem = await Save.findOne({ where: { user_id: id, itemId } });
 
             if (existingSavedItem) {
-                await Item.update(
-                    { is_save: false },
-                    { where: { id: itemId } }
-                );
-                await Save.destroy({ where: { user_id: id, itemId } });
-                return RESPONSE.success(res, 1209);
+                const post = await Save.destroy({ where: { user_id: id, itemId } });
+                const posts = {
+                    post,
+                    isSaved: false
+                }
+                return RESPONSE.success(res, 1209, posts);
             } else {
                 const post = await Save.create({ user_id: id, itemId, post_category: "Item" });
-                await Item.update(
-                    { is_save: true },
-                    { where: { id: itemId } }
-                );
-                return RESPONSE.success(res, 1210, post);
+                const posts = {
+                    post,
+                    isSaved: true
+                }
+                return RESPONSE.success(res, 1210, posts);
             }
         }
+
     } catch (error) {
         console.log(error)
         return RESPONSE.error(res, error.message);
     }
 };
+
+// const savePost = async (req, res) => {
+//     try {
+//         const { user: { id }, body: { roomId, eventId, roommateId, itemId } } = req;
+
+//         if (roomId) {
+//             const existingSavedRoom = await Save.findOne({ where: { user_id: id, roomId } });
+
+//             if (existingSavedRoom) {
+//                 await Save.destroy({ where: { user_id: id, roomId } });
+//                 const response = { ...RESPONSE.success(1201), is_save: false };
+//                 return res.json(response);
+//             } else {
+//                 const post = await Save.create({ user_id: id, roomId, post_category: "Room" });
+//                 const response = { ...RESPONSE.success(1204), is_save: true, post };
+//                 return res.json(response);
+//             }
+//         }
+//         if (eventId) {
+//             const existingSavedEvent = await Save.findOne({ where: { user_id: id, eventId } });
+
+//             if (existingSavedEvent) {
+//                 await Save.destroy({ where: { user_id: id, eventId } });
+//                 const response = { ...RESPONSE.success(1205), is_save: false };
+//                 return res.json(response);
+//             } else {
+//                 const post = await Save.create({ user_id: id, eventId, post_category: "Event" });
+//                 const response = { ...RESPONSE.success(1206), is_save: true, post };
+//                 return res.json(response);
+//             }
+//         }
+//         if (roommateId) {
+//             const existingSavedRoommte = await Save.findOne({ where: { user_id: id, roommateId } });
+
+//             if (existingSavedRoommte) {
+//                 await Save.destroy({ where: { user_id: id, roommateId } });
+//                 const response = { ...RESPONSE.success(1207), is_save: false };
+//                 return res.json(response);
+//             } else {
+//                 const post = await Save.create({ user_id: id, roommateId, post_category: "Roommate" });
+//                 const response = { ...RESPONSE.success(1208), is_save: true, post };
+//                 return res.json(response);
+//             }
+//         }
+//         if (itemId) {
+//             const existingSavedItem = await Save.findOne({ where: { user_id: id, itemId } });
+
+//             if (existingSavedItem) {
+//                 await Save.destroy({ where: { user_id: id, itemId } });
+//                 const responses = { ...RESPONSE.success(1209), is_save: false };
+//                 return res.json(responses);
+//             } else {
+//                 const post = await Save.create({ user_id: id, itemId, post_category: "Item" });
+//                 const response = { ...RESPONSE.success(res, 1210, post), is_save: true };
+//                 return response;
+
+//             }
+//         }
+//     } catch (error) {
+//         console.log(error);
+//         return RESPONSE.error(res, error.message);
+//     }
+// };
+
 
 
 const getSavePost = async (req, res) => {
@@ -192,6 +253,10 @@ const getSavePost = async (req, res) => {
                         {
                             model: Roommate_media,
                             attributes: ['media', 'id']
+                        },
+                        {
+                            model: Users,
+                            attributes: ['name', 'picture']
                         },
                         {
                             model: SelectedInterest,

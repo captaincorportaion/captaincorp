@@ -8,7 +8,7 @@ const roomRules = db.room_rules;
 const Room = db.rooms;
 const Houserules = db.houseRules;
 const Houseamenities = db.houseAmenities;
-
+const SavedPost = db.saves
 // const imageUpload = require('../helpers/file')
 // const videoUpload = require('../helpers/file')
 
@@ -490,6 +490,7 @@ const getAllRooms = async (req, res) => {
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
     try {
+        const { user: { id } } = req;
         const { city, bedRooms, bathRooms, tenant, availibility, minimumStay, liveWith, max_budget, min_budget, type } = req.query;
         let condition = {}
 
@@ -519,10 +520,16 @@ const getAllRooms = async (req, res) => {
                                 as: 'houserules'
                             }
                         ]
-                    }
+                    },
                 ],
                 order: [['createdAt', 'DESC']]
             });
+            for (const room of rooms) {
+                const isSaved = await SavedPost.findOne({
+                    where: { user_id: id, roomId: room.id }
+                });
+                room.dataValues.isSaved = isSaved !== null;
+            }
             return RESPONSE.success(res, 1104, rooms);
         }
 
@@ -584,7 +591,7 @@ const getAllRooms = async (req, res) => {
                             as: 'houserules'
                         }
                     ]
-                }
+                },
             ],
             order: [['createdAt', 'DESC']]
         });
@@ -646,16 +653,17 @@ const getRoom = async (req, res) => {
 
 const getAllRoomsById = async (req, res) => {
     let validation = new Validator(req.query, {
-        id: 'required',
+        ids: 'required',
     });
     if (validation.fails()) {
         firstMessage = Object.keys(validation.errors.all())[0];
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
     try {
-        const { id } = req.query;
+        const { ids } = req.query;
+        const { user: { id } } = req
 
-        const rooms = await Room.findByPk(id, {
+        const rooms = await Room.findByPk(ids, {
             include: [
                 {
                     model: Media,
@@ -691,6 +699,15 @@ const getAllRoomsById = async (req, res) => {
 
         if (!rooms) {
             return RESPONSE.error(res, 1105);
+        }
+        const isSaved = await SavedPost.findOne({
+            where: { user_id: id, roomId: ids }
+        });
+
+        if (isSaved) {
+            rooms.dataValues.isSaved = true;
+        } else {
+            rooms.dataValues.isSaved = false;
         }
 
         return RESPONSE.success(res, 1104, rooms);
