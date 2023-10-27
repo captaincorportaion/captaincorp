@@ -60,7 +60,8 @@ const createEvent = async (req, res) => {
         event_details: 'required|string',
         seats: 'required|numeric',
         date: 'required',
-        time: 'required',
+        start_time: 'required',
+        end_time: 'required',
         price: 'required',
         city: 'required|string',
         lat: 'required',
@@ -74,21 +75,15 @@ const createEvent = async (req, res) => {
     }
     try {
         const authUser = req.user.id;
-
-        const { event_title, event_details, seats, date, time, price, city, lat, long, category_id, event_amenities_id } = req.body;
-
-        const event = await Event.create({ user_id: authUser, event_title, event_details, seats, date, time, price, city, lat, long, category_id });
-
+        const { event_title, event_details, seats, date, start_time, end_time, price, city, lat, long, category_id, event_amenities_id } = req.body;
+        const event = await Event.create({ user_id: authUser, event_title, event_details, seats, date, start_time, end_time, price, city, lat, long, category_id });
         if (event) {
-
             for (selectedData of event_amenities_id) {
-
                 await Selected_amenities.create({
                     event_amenities_id: selectedData,
                     event_id: event.id
                 });
             }
-
             let photos = [];
             if (typeof req.files !== 'undefined' && req.files.length > 0) {
                 photos = await UploadFiles(req.files, 'images/event_images', 'image');
@@ -99,9 +94,7 @@ const createEvent = async (req, res) => {
                     photo: image
                 })
             }
-
         }
-
         const findEvent = await Event.findOne({
             where: { id: event.id },
             include: [
@@ -125,8 +118,6 @@ const createEvent = async (req, res) => {
                 }
             ],
         });
-
-
         return RESPONSE.success(res, 2005);
     } catch (error) {
         console.log(error)
