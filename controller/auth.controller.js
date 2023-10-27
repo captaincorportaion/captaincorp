@@ -89,6 +89,7 @@ const signUp = async (req, res) => {
             const newUser = user.toJSON();
             const userToken = await UserSession.createToken(newUser.id);
             newUser.token = userToken;
+            delete newUser.password;
 
             const addUser = {
                 newUser,
@@ -123,6 +124,7 @@ const login = async (req, res) => {
                 ]
             }
         });
+        
 
         if (!userIsExist) {
             return RESPONSE.error(res, 1004);
@@ -131,6 +133,7 @@ const login = async (req, res) => {
         if (userIsExist != null && bcrypt.compareSync(password, userIsExist.password)) {
             userIsExist = userIsExist.toJSON();
             userIsExist.token = await UserSession.createToken(userIsExist.id);
+            delete userIsExist.password;
             return RESPONSE.success(res, 1002, userIsExist);
         } else {
             return RESPONSE.error(res, 1005)
