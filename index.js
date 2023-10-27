@@ -11,7 +11,6 @@ const path = require('path')
 const { Server } = require('socket.io')
 const socketController = require('./controller/chat.controller.js')
 const fs = require("fs");
-let writeFile="====================================\n";
 
 app.use(upload.any())
 app.use(cors());
@@ -41,9 +40,6 @@ if (config.protocol == 'https') {
     var http = require('http')
     server = http.createServer(app);
 };
-writeFile+=config.protocol
-writeFile+=config.sslCertificates.privkey
-writeFile+=config.sslCertificates.fullchain
 const io = new Server(server, {
     cors: {
         origin: "*"
@@ -57,9 +53,5 @@ socketController.socketEvent(io);
 
 const port = process.env.PORT || 3000;
 server.listen(port, (err) => {
-    writeFile+=err
     console.log(`Server running on ${port}.`);
-});
-fs.appendFile(`logger.txt`, writeFile, (err) => {
-    if (err) console.log(err);
 });
