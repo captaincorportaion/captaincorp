@@ -11,5 +11,3 @@ module.exports.getProfileUrl = (fileName) => {
 module.exports.getMediaUrl = (fileName, folderName) => {
     return config.appPath + `/images` + `/${folderName}/` + fileName;
 }
-
-

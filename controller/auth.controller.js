@@ -69,7 +69,7 @@ const signUp = async (req, res) => {
             firstMessage = Object.keys(validation.errors.all())[0];
             return RESPONSE.error(res, validation.errors.first(firstMessage), '', 400);
         }
-        const { name, email, password } = req.body;
+        const { name, email, password,fcm_token } = req.body;
 
         const existingUser = await Users.findOne({ where: { email: email } });
 
@@ -83,6 +83,7 @@ const signUp = async (req, res) => {
             name,
             email,
             password: hashedPassword,
+            fcm_token
         });
 
         if (user) {
@@ -90,6 +91,7 @@ const signUp = async (req, res) => {
             const userToken = await UserSession.createToken(newUser.id);
             newUser.token = userToken;
             delete newUser.password;
+            delete newUser.fcm_token;
 
             const addUser = {
                 newUser,

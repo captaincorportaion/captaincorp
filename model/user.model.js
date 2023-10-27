@@ -64,6 +64,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE,
             allowNull: true,
         },
+        fcm_token: {
+            type: Sequelize.STRING(255),
+            allowNull: true,
+        },
         createdAt: {
             field: 'created_at',
             type: Sequelize.DATE,

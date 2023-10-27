@@ -476,7 +476,7 @@ const getRoommateById = async (req, res) => {
             include: [
                 {
                     model: Roommate_media,
-                    attributes: ['media', 'id']
+                    attributes: ['media', 'id', 'media_type']
                 },
 
                 {
