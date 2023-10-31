@@ -16,6 +16,7 @@ const MESSAGES = {
     '1014': "ConverSation not found",
     '1015': "Update profile successfully",
     '1016': "get profile successfully",
+    '1017': "Incorrect OTP",
 
     //ROOM
     '1101': "Added room successfully",

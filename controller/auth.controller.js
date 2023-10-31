@@ -69,7 +69,7 @@ const signUp = async (req, res) => {
             firstMessage = Object.keys(validation.errors.all())[0];
             return RESPONSE.error(res, validation.errors.first(firstMessage), '', 400);
         }
-        const { name, email, password,fcm_token } = req.body;
+        const { name, email, password, fcm_token } = req.body;
 
         const existingUser = await Users.findOne({ where: { email: email } });
 
@@ -126,7 +126,7 @@ const login = async (req, res) => {
                 ]
             }
         });
-        
+
 
         if (!userIsExist) {
             return RESPONSE.error(res, 1004);
@@ -242,7 +242,7 @@ const resetPassword = async (req, res, next) => {
         });
 
         if (!user) {
-            return RESPONSE.error(res, 1007)
+            return RESPONSE.error(res, 1017)
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         // Update the user's password
