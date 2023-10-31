@@ -4,6 +4,7 @@ const Validator = require('validatorjs');
 
 
 //.....................models...............
+const Users = db.users;
 const UserSession = db.user_sessions;
 const Conversations = db.conversations;
 const Conversations_chats = db.conversations_chat;
@@ -111,6 +112,17 @@ const getConversations = async (data) => {
                     order: [['created_at', 'DESC']],
                     limit: 1,
                     as: 'chat',
+                },
+                {
+                    model: Users, // Include the Users model for user details.
+                    as: 'receiver', // Alias for the user details join.
+                    where: {
+                        [Op.or]: [
+                            { id: Sequelize.col('Conversations.sender_id') }, // Match sender_id
+                            { id: Sequelize.col('Conversations.receiver_id') } // Match receiver_id
+                        ]
+                    },
+                    attributes: ['id', 'name', 'picture'],
                 },
             ],
             order: [
