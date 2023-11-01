@@ -10,6 +10,7 @@ router.get("/get-profile", checkAuth.authUser, authController.getProfile);
 
 // reset resetPassword
 router.post("/forgotPassword", authController.forgotPassword);
+router.post("/verifyOtp", authController.verifyOtp);
 router.post("/resetPassword", authController.resetPassword);
 
 

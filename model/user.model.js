@@ -60,6 +60,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: true,
         },
+        otpToken: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
         resetTokenExpiry: {
             type: Sequelize.DATE,
             allowNull: true,

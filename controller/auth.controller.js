@@ -2,6 +2,7 @@
 const db = require("../config/db.config");
 const Validator = require('validatorjs');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const nodemailer = require('nodemailer')
 const { Sequelize, Op } = require('sequelize');
 const Users = db.users;
@@ -231,25 +232,53 @@ const forgotPassword = async (req, res, next) => {
     }
 };
 
+const verifyOtp = async (req, res) => {
+    try {
+        const { generateOtp } = req.body
+        const checkOtp = await Users.findOne({
+            where: { generateOtp },
+            resetTokenExpiry: { [Op.gt]: new Date() },
+        })
+        if (!checkOtp) {
+            return RESPONSE.error(res, 1017)
+        }
+
+        const newToken = crypto.randomBytes(50).toString('hex');
+        const newOtpToken = newToken;
+
+        checkOtp.otpToken = newOtpToken;
+        await checkOtp.save();
+        const token = {
+            newOtpToken
+        }
+        return RESPONSE.success(res, 1018, token);
+
+    } catch (error) {
+        console.log(error);
+        return RESPONSE.error(res, error.message);
+    }
+
+}
+
 const resetPassword = async (req, res, next) => {
     try {
-        const { generateOtp, newPassword } = req.body;
+        const { otpToken, newPassword } = req.body;
         const user = await Users.findOne({
             where: {
-                generateOtp,
+                otpToken,
                 resetTokenExpiry: { [Op.gt]: new Date() },
             },
         });
 
         if (!user) {
-            return RESPONSE.error(res, 1017)
+            return RESPONSE.error(res, 1009)
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        // Update the user's password
         await user.update({
             password: hashedPassword,
             generateOtp: null,
             resetTokenExpiry: null,
+            otpToken:null
         });
 
         // Send password reset confirmation email
@@ -324,6 +353,6 @@ const getProfile = async (req, res) => {
 }
 
 
-module.exports = { signUp, login, forgotPassword, resetPassword, updateProfile, getProfile };
+module.exports = { signUp, login, forgotPassword, resetPassword, updateProfile, getProfile, verifyOtp };
 
 
