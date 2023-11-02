@@ -29,6 +29,24 @@ const addCard = async (req, res) => {
     }
 }
 
+const deleteCard = async (req, res) => {
+    try {
+        const authUser = req.user.id;
+        const id = req.params.id;
+        const card = await Card.findOne({ where: { id: id, user_id: authUser } });
+        if (!card) {
+            return RESPONSE.error(res, 'card not found');
+        }
+
+        const deleteCard = await card.destroy({ where: { id: id } });
+
+        return RESPONSE.success(res, 1110);
+    } catch (error) {
+        console.error(error);
+        return RESPONSE.error(res, error.message);
+    }
+}
+
 //get your all card
 const getCard = async (req, res) => {
     try {
@@ -46,5 +64,6 @@ const getCard = async (req, res) => {
 
 module.exports = {
     addCard,
-    getCard
+    getCard,
+    deleteCard
 }
