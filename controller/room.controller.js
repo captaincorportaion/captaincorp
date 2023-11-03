@@ -496,6 +496,11 @@ const getAllRooms = async (req, res) => {
 
         if (Object.keys(req.query).length === 0) {
             const rooms = await Room.findAll({
+                where: {
+                    user_id: {
+                        [Op.ne]: id
+                    }
+                },
                 include: [
                     {
                         model: Media,
@@ -564,7 +569,7 @@ const getAllRooms = async (req, res) => {
         if (liveWith) {
             condition.liveWith = liveWith;
         }
-
+        condition.user_id = { [Op.not]: id };
         const rooms = await Room.findAll({
             where: condition,
             include: [

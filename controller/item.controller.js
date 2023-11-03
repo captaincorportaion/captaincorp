@@ -244,9 +244,10 @@ const getAllRentAndSale = async (req, res) => {
         if (min_budget && max_budget) {
             condition.price = { [Op.gte]: min_budget, [Op.lte]: max_budget }
         }
-
+        condition.user_id = { [Op.not]: id };
         const findAllData = await Items.findAll({
             where: condition,
+
             include: [
                 {
                     model: Items_photos,

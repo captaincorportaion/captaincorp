@@ -343,6 +343,11 @@ const getAllEvents = async (req, res) => {
         const { user: { id } } = req;
         const authUser = req.user;
         const findEvent = await Event.findAll({
+            where: {
+                user_id: {
+                    [Op.ne]: id 
+                }
+            },
             include: [
                 {
                     model: Event_photos,

@@ -147,34 +147,6 @@ const login = async (req, res) => {
     }
 }
 
-// const forgotPassword = async (req, res) => {
-//     try {
-//         let validation = new Validator(req.body, {
-//             email: 'required',
-//         });
-
-//         if (validation.fails()) {
-//             firstMessage = Object.keys(validation.errors.all())[0];
-//             return RESPONSE.error(res, validation.errors.first(firstMessage), '', 400);
-//         }
-//         const { email } = req.body;
-
-//         const existingUser = await Users.findOne({ where: { email: email } });
-
-//         if (existingUser) {
-//             return RESPONSE.error(res, 1003);
-//         }
-//         const generateOtp = () => Math.floor(1000 + Math.random() * 9000).toString()
-//         let genOtp = generateOtp() // generate otp
-//         const otp = await bcrypt.hash(genOtp, 10)
-
-
-//     } catch (error) {
-//         console.log(error)
-//         return RESPONSE.error(res, error.message);
-//     }
-// }
-
 const forgotPassword = async (req, res, next) => {
     let validation = new Validator(req.body, {
         email: 'required',

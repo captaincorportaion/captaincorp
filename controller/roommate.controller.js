@@ -409,7 +409,7 @@ const getAllRoommate = async (req, res) => {
             lifeStyleCondition
         }
 
-
+        condition.user_id = { [Op.not]: id };
         const findData = await Roommate.findAll({
             where: condition,
             include: [
