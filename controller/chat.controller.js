@@ -85,20 +85,16 @@ const createMessage = async (data) => {
 //................Get conversations
 const getConversations = async (data) => {
     try {
-
         const authUser = data.authUser;
-
         let conditionOffset = {};
         // Pagination
         const page = Number(data.page) || 1;
         const limit = Number(data.limit) || 15;
         const offset = (page - 1) * limit;
-
         if (limit && page) {
             conditionOffset.limit = limit;
             conditionOffset.offset = offset;
         }
-
         const conversations = await Conversations.findAndCountAll({
             where: {
                 [Op.or]: [
@@ -112,25 +108,28 @@ const getConversations = async (data) => {
                     order: [['created_at', 'DESC']],
                     limit: 1,
                     as: 'chat',
+                    include: [
+                        {
+                            model: Users,
+                            attributes: ['id', 'name', 'picture']
+                        }
+                    ]
                 },
-                {
-                    model: Users, // Include the Users model for user details.
-                    as: 'receiver', // Alias for the user details join.
-                    where: {
-                        [Op.or]: [
-                            { id: Sequelize.col('Conversations.sender_id') }, // Match sender_id
-                            { id: Sequelize.col('Conversations.receiver_id') } // Match receiver_id
-                        ]
-                    },
-                    attributes: ['id', 'name', 'picture'],
-                },
+
             ],
             order: [
                 [Sequelize.literal('(SELECT MAX(`created_at`) FROM `Conversations_chats` WHERE `conversations_id` = `Conversations`.`id`)'), 'DESC'],
             ],
+            attributes: [
+                [
+                    Sequelize.literal(
+                        '(SELECT COUNT(*) FROM `Conversations_chats` WHERE `conversations_id` = `conversations`.`id` AND status IN ("Sent", "Deliver"))'
+                    ),
+                    'messageCount'
+                ],
+            ],
             ...conditionOffset
         });
-
         conversations.page_Information = {
             totalrecords: conversations.count,
             lastpage: Math.ceil(conversations.count / limit),
@@ -142,8 +141,6 @@ const getConversations = async (data) => {
         console.log(error);
     }
 }
-
-
 
 //.....................get chat By Id  API .....................
 
@@ -224,6 +221,34 @@ async function socketEvent(io) {
             receivers.map(receiver => {
                 io.to(receiver.socketId).emit('getMessage', message)
             });
+            const authUser = data.authUser;
+            const conversationExists = await Conversations.findAll({
+                where: {
+                    [Op.or]: [
+                        { receiver_id: authUser.userId },
+                        { sender_id: authUser.userId }
+                    ]
+                },
+            });
+
+            if (conversationExists) {
+                const conversation = await getConversations(data);
+                // console.log('senders', senders)
+                senders.forEach(sender => {
+                    io.to(sender.socketId).emit("conversations", conversation);
+                });
+
+                receivers.forEach(async (receiver) => {
+                    const receiverData = {
+                        authUser: {
+                            userId: receiver.userId
+                        }
+                    };
+                    const receiverConversation = await getConversations(receiverData);
+                    io.to(receiver.socketId).emit("conversations", receiverConversation);
+                });
+
+            }
 
         });
 
