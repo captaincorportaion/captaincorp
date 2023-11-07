@@ -86,15 +86,15 @@ const createMessage = async (data) => {
 const getConversations = async (data) => {
     try {
         const authUser = data.authUser;
-        let conditionOffset = {};
+        // let conditionOffset = {};
         // Pagination
-        const page = Number(data.page) || 1;
-        const limit = Number(data.limit) || 15;
-        const offset = (page - 1) * limit;
-        if (limit && page) {
-            conditionOffset.limit = limit;
-            conditionOffset.offset = offset;
-        }
+        // const page = Number(data.page) || 1;
+        // const limit = Number(data.limit) || 15;
+        // const offset = (page - 1) * limit;
+        // if (limit && page) {
+        //     conditionOffset.limit = limit;
+        //     conditionOffset.offset = offset;
+        // }
         const conversations = await Conversations.findAndCountAll({
             where: {
                 [Op.or]: [
@@ -132,14 +132,14 @@ const getConversations = async (data) => {
                     'messageCount'
                 ],
             ],
-            ...conditionOffset
+            // ...conditionOffset
         });
-        conversations.page_Information = {
-            totalrecords: conversations.count,
-            lastpage: Math.ceil(conversations.count / limit),
-            currentpage: page,
-            previouspage: 0 + (page - 1)
-        }
+        // conversations.page_Information = {
+        //     totalrecords: conversations.count,
+        //     lastpage: Math.ceil(conversations.count / limit),
+        //     currentpage: page,
+        //     previouspage: 0 + (page - 1)
+        // }
         return conversations
     } catch (error) {
         console.log(error);
