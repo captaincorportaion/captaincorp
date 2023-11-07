@@ -1,5 +1,5 @@
 const db = require('../config/db.config');
-const { Op, Sequelize } = require('sequelize');
+const { Op, Sequelize, where } = require('sequelize');
 const Validator = require('validatorjs');
 
 
@@ -108,13 +108,17 @@ const getConversations = async (data) => {
                     order: [['created_at', 'DESC']],
                     limit: 1,
                     as: 'chat',
-                    include: [
-                        {
-                            model: Users,
-                            attributes: ['id', 'name', 'picture']
-                        }
-                    ]
                 },
+                {
+                    model: Users,
+                    as: 'sender',
+                    attributes: ['id', 'name', 'picture']
+                },
+                {
+                    model: Users,
+                    as: 'receiver',
+                    attributes: ['id', 'name', 'picture']
+                }
 
             ],
             order: [
@@ -182,6 +186,17 @@ const getChatById = async (req, res) => {
             order: [['createdAt', 'DESC']],
 
         })
+        const changeStatus = await Conversations_chats.update(
+            { status: "Read" },
+            {
+                where: {
+                    conversations_id: findConversation.id,
+                    status: {
+                        [Op.in]: ["Sent", "Deliver"]
+                    }
+                }
+            }
+        );
 
         let responseData = {
             chatData: findChat.rows,

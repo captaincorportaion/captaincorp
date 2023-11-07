@@ -27,7 +27,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true
         },
         status: {
-            type: Sequelize.ENUM(['Sent', 'Deliver', 'receive']),
+            type: Sequelize.ENUM(['Sent', 'Deliver','Read']),
             defaultValue: 'Sent'
         },
         createdAt: {
