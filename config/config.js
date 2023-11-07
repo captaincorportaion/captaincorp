@@ -16,6 +16,6 @@ module.exports = {
         fullchain: process.env.FULLCHAIN || './fullchain.pem'
     },
     email: {
-        fromEmail: process.env.EMAIL_FROM || "testd3v3@gmail.com",
+        fromEmail: process.env.EMAIL_FROM || "captaincorporationboston@gmail.com",
     },
 };
