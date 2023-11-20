@@ -327,6 +327,10 @@ const getEvent = async (req, res) => {
                             attributes: ['name', 'id']
                         }
                     ]
+                },
+                {
+                    model: Users,
+                    attributes: ['name', 'picture']
                 }
             ],
         });
@@ -366,6 +370,10 @@ const getAllEvents = async (req, res) => {
                             attributes: ['name', 'id']
                         }
                     ]
+                },
+                {
+                    model: Users,
+                    attributes: ['name', 'picture']
                 }
             ],
             order: [['createdAt', 'DESC']]

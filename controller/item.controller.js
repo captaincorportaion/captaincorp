@@ -257,6 +257,10 @@ const getAllRentAndSale = async (req, res) => {
                     model: Item_categories,
                     attributes: ['name', 'id']
                 },
+                {
+                    model: Users,
+                    attributes: ['name', 'picture']
+                }
             ],
             order: [['createdAt', 'DESC']]
         });
@@ -360,6 +364,10 @@ const getRentAndSale = async (req, res) => {
                         model: Item_categories,
                         attributes: ['name', 'id']
                     },
+                    {
+                        model: Users,
+                        attributes: ['name', 'picture']
+                    }
                 ],
             })
         if (!findData.length) {

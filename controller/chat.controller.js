@@ -166,13 +166,23 @@ const getChatById = async (req, res) => {
 
         const findConversation = await Conversations.findOne({
             where: {
-                [Op.and]: [
-                    { sender_id: authUser },
-                    { receiver_id: receiver_id }
+                [Op.or]: [
+                    {
+                        [Op.and]: [
+                            { sender_id: authUser },
+                            { receiver_id: receiver_id }
+                        ]
+                    },
+                    {
+                        [Op.and]: [
+                            { sender_id: receiver_id },
+                            { receiver_id: authUser }
+                        ]
+                    }
                 ]
             },
         });
-
+        
         if (!findConversation) {
             return RESPONSE.error(res, 1014);
         }

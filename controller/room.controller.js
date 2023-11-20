@@ -526,6 +526,10 @@ const getAllRooms = async (req, res) => {
                             }
                         ]
                     },
+                    {
+                        model: Users,
+                        attributes: ['name', 'picture']
+                    }
                 ],
                 order: [['createdAt', 'DESC']]
             });
@@ -597,6 +601,10 @@ const getAllRooms = async (req, res) => {
                         }
                     ]
                 },
+                {
+                    model: Users,
+                    attributes: ['name', 'picture']
+                }
             ],
             order: [['createdAt', 'DESC']]
         });
@@ -645,6 +653,10 @@ const getRoom = async (req, res) => {
                         }
                     ]
                 },
+                {
+                    model: Users,
+                    attributes: ['name', 'picture']
+                }
             ],
             order: [['createdAt', 'DESC']]
         })
