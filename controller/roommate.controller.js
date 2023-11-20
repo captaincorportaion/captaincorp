@@ -202,7 +202,6 @@ const updateRoommate = async (req, res) => {
             // if (data.length > 1) {
             //     return RESPONSE.error(res, 2202)
             // }
-
             photo = await UploadFiles(data, 'images/roommate_media', 'image');
         }
 
@@ -260,16 +259,17 @@ const updateRoommate = async (req, res) => {
             }
 
 
-            //.................upload media ..............
+              //.................upload media ..............
             if (typeof req.files !== 'undefined' && req.files.length > 0) {
                 photos = await uploadRoommateFiles(req.files, 'images/roommate_media');
             }
-
             let mediaUrl = [];
             for (const image of photos) {
                 const media = await Roommate_media.create({
-                    roommate_id: updateRoommate.id,
-                    media: image,
+
+                    roommate_id: updateRoommate.id, 
+                    media: image.roommate_media,
+                    media_type: image.media_type,
                 })
                 mediaUrl.push(media)
                 responseData.roommate_media = mediaUrl
