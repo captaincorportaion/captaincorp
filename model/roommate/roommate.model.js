@@ -61,6 +61,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false
         },
+        bed_time: {
+            type: Sequelize.TIME,
+            allowNull: false
+        },
         bedrooms: {
             type: Sequelize.INTEGER,
             allowNull: false,
