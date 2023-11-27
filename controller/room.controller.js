@@ -287,7 +287,8 @@ const updateRoom = async (req, res) => {
             extraBills,
             city,
             lat,
-            lng
+            lng,
+            address
         } = req.body;
 
         // if aminities is not in array formate then throw error
@@ -336,6 +337,7 @@ const updateRoom = async (req, res) => {
             city,
             lat,
             lng,
+            address
         });
         // console.log('newRoom', newRoom)
         let responseData = null;
