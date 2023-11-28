@@ -181,24 +181,7 @@ const updateEvent = async (req, res) => {
                 responseData.event_photos.push(eventPhoto);
             }
         }
-
-
-
-        // let photos = [];
-        // if (typeof req.files !== 'undefined' && req.files.length > 0) {
-        //     photos = await UploadFiles(req.files, 'images/event_images', 'image');
-        // }
-        // let event_photos = []
-        // for (const image of event_photos) {
-        //     const eventPhoto = await Event_photos.create({
-        //         event_id: event.id,
-        //         photo: image
-        //     })
-        //     event_photos.push(eventPhoto)
-
-        //     responseData.event_photos = event_photos
-
-        // }
+        
         return RESPONSE.success(res, 2009);
     } catch (error) {
         console.log(error)
