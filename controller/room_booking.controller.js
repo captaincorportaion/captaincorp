@@ -52,13 +52,9 @@ const bookingRoom = async (req, res) => {
         }
 
         const bookingRoom = await Room_booking.create({ date, minimum_stay, user_id: authUser.id, room_id: findData.id }, { transaction: trans })
-        const obj = {
-            bookingRoom,
-            isExist,
-            findData
-        }
+
         await trans.commit();
-        return RESPONSE.success(res, 1106, obj);
+        return RESPONSE.success(res, 1106, bookingRoom);
     } catch (error) {
 
         await trans.rollback();
