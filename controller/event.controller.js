@@ -164,22 +164,41 @@ const updateEvent = async (req, res) => {
             const createdAmenities = await Selected_amenities.bulkCreate(amenitieData);
             responseData.selected_amenities = createdAmenities
         }
+        if (event) {
+            let photos = [];
 
+            if (typeof req.files !== 'undefined' && req.files.length > 0) {
+                photos = await UploadFiles(req.files, 'images/event_images', 'image');
+            }
 
-        if (typeof req.files !== 'undefined' && req.files.length > 0) {
-            photos = await UploadFiles(req.files, 'images/event_images', 'image');
+            for (const image of photos) {
+                const eventPhoto = await Event_photos.create({
+                    event_id: event.id,
+                    photo: image
+                });
+
+                responseData.event_photos = responseData.event_photos || [];
+                responseData.event_photos.push(eventPhoto);
+            }
         }
-        let event_photos = []
-        for (const image of event_photos) {
-            const eventPhoto = await Event_photos.create({
-                event_id: event.id,
-                photo: image
-            })
-            event_photos.push(eventPhoto)
 
-            responseData.event_photos = event_photos
 
-        }
+
+        // let photos = [];
+        // if (typeof req.files !== 'undefined' && req.files.length > 0) {
+        //     photos = await UploadFiles(req.files, 'images/event_images', 'image');
+        // }
+        // let event_photos = []
+        // for (const image of event_photos) {
+        //     const eventPhoto = await Event_photos.create({
+        //         event_id: event.id,
+        //         photo: image
+        //     })
+        //     event_photos.push(eventPhoto)
+
+        //     responseData.event_photos = event_photos
+
+        // }
         return RESPONSE.success(res, 2009);
     } catch (error) {
         console.log(error)
@@ -349,7 +368,7 @@ const getAllEvents = async (req, res) => {
         const findEvent = await Event.findAll({
             where: {
                 user_id: {
-                    [Op.ne]: id 
+                    [Op.ne]: id
                 }
             },
             include: [
