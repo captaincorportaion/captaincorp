@@ -46,7 +46,7 @@ const bookingRoom = async (req, res) => {
             return RESPONSE.error(res, 1105);
         }
 
-        if (Number(minimum_stay) > Number(findData.minimumStay)) {
+        if (Number(minimum_stay) < Number(findData.minimumStay)) {
             await trans.rollback();
             return RESPONSE.error(res, 2302);
         }
