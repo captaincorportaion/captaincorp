@@ -594,7 +594,7 @@ const getRoommate = async (req, res) => {
                 },
                 {
                     model: Users,
-                    attributes: ['name']
+                    attributes: ['name','picture']
                 }
             ],
             order: [['createdAt', 'DESC']]
