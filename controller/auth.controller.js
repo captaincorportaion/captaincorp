@@ -64,13 +64,14 @@ const signUp = async (req, res) => {
             name: 'required',
             email: 'required',
             password: 'required',
+            dob: 'required'
         });
 
         if (validation.fails()) {
             firstMessage = Object.keys(validation.errors.all())[0];
             return RESPONSE.error(res, validation.errors.first(firstMessage), '', 400);
         }
-        const { name, email, password, fcm_token } = req.body;
+        const { name, email, password, dob, fcm_token } = req.body;
 
         const existingUser = await Users.findOne({ where: { email: email } });
 
@@ -84,7 +85,8 @@ const signUp = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            fcm_token
+            fcm_token,
+            dob
         });
 
         if (user) {
@@ -250,7 +252,7 @@ const resetPassword = async (req, res, next) => {
             password: hashedPassword,
             generateOtp: null,
             resetTokenExpiry: null,
-            otpToken:null
+            otpToken: null
         });
 
         // Send password reset confirmation email
