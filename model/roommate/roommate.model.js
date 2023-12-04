@@ -35,10 +35,6 @@ module.exports = (sequelize, Sequelize) => {
             enum: ['Male', 'Female', 'Other'],
             allowNull: false
         },
-        age: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
         Occupation: {
             type: Sequelize.STRING,
             allowNull: false
