@@ -53,6 +53,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false
         },
+        age: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
         minimum_stay: {
             type: Sequelize.INTEGER,
             allowNull: false

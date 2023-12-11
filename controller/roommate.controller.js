@@ -67,6 +67,7 @@ const addRoommate = async (req, res) => {
         monthly_rent: 'required|numeric',
         minimum_stay: 'required|numeric',
         bathrooms: 'required|numeric',
+        age: 'required|numeric',
         bedrooms: 'required|numeric',
         no_of_roommates: 'required|numeric',
         marital_status: 'required|in:Single,Married',
@@ -85,9 +86,9 @@ const addRoommate = async (req, res) => {
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
     try {
-        const { city, lat, long, address, gender, Occupation, food_choice, religion, bed_time, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, marital_status, gender_preference, preference_food_choice, preference_age, interest_id, social_id, lifestyle_id, message } = req.body;
+        const { city, lat, long, age, address, gender, Occupation, food_choice, religion, bed_time, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, marital_status, gender_preference, preference_food_choice, preference_age, interest_id, social_id, lifestyle_id, message } = req.body;
         const authUser = req.user.id
-        const addRoommate = await Roommate.create({ user_id: authUser, city, lat, long, address, bed_time, gender, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, marital_status, gender_preference, preference_food_choice, preference_age, message })
+        const addRoommate = await Roommate.create({ user_id: authUser, city, lat, age, long, address, bed_time, gender, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, marital_status, gender_preference, preference_food_choice, preference_age, message })
         if (addRoommate) {
             for (const selectedInterest of interest_id) {
                 await SelectedInterest.create({
@@ -182,7 +183,7 @@ const updateRoommate = async (req, res) => {
         if (!roommate) {
             return RESPONSE.error(res, 'Roommate not found');
         }
-        const { city, lat, long, gender, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, bed_time, no_of_roommates, required_roommate, marital_status, gender_preference, preference_food_choice, preference_age, lifestyle, interest_id, social_id, lifestyle_id, message } = req.body;
+        const { city, lat, long, gender, age, Occupation, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, bed_time, no_of_roommates, required_roommate, marital_status, gender_preference, preference_food_choice, preference_age, lifestyle, interest_id, social_id, lifestyle_id, message } = req.body;
 
         if (interest_id && interest_id.length < 0) {
             return RESPONSE.error(res, 1103)
@@ -205,7 +206,7 @@ const updateRoommate = async (req, res) => {
             photo = await UploadFiles(data, 'images/roommate_media', 'image');
         }
 
-        const updateRoommate = await roommate.update({ image: photo[0], city, lat, long, gender, Occupation, bed_time, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, required_roommate, marital_status, gender_preference, preference_food_choice, preference_age, lifestyle, message })
+        const updateRoommate = await roommate.update({ image: photo[0], city, lat, age, long, gender, Occupation, bed_time, food_choice, religion, monthly_rent, minimum_stay, bathrooms, bedrooms, no_of_roommates, required_roommate, marital_status, gender_preference, preference_food_choice, preference_age, lifestyle, message })
 
         let responseData = null
         responseData = updateRoommate.toJSON();
