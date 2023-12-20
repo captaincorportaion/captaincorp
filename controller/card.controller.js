@@ -1,27 +1,61 @@
 const Validator = require("validatorjs");
-const db = require('../config/db.config');
+const { Op } = require('sequelize');
+const db = require('../config/db.config')
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Card = db.card;
+const Users = db.users;
 
 const addCard = async (req, res) => {
-    let validation = new Validator(req.body, {
-        card_number: 'required|numeric',
-        cvc: 'required|numeric',
-        expiry_month: 'required|numeric',
-        expiry_year: 'required|numeric',
-        cardholder_name: 'required|alpha',
-    });
-    if (validation.fails()) {
-        firstMessage = Object.keys(validation.errors.all())[0];
-        return RESPONSE.error(res, validation.errors.first(firstMessage))
-    }
     try {
-        const { card_number, cvc, expiry_month, expiry_year, cardholder_name } = req.body;
+        const requestData = req.body;
 
-        const authUser = req.user.id;
+        const authUserId = req.user.id;
+        const token = requestData.tokenId;
 
-        const card = await Card.create({ user_id: authUser, card_number, cvc, expiry_month, expiry_year, cardholder_name });
+        const stripeCustomer = await stripe.customers.create({
+            email: req.user.email,
+            source: token,
+            name: req.user.name,
+            address: {
+                line1: 'testing for prim',
+                postal_code: requestData.zipCode,
+                city: requestData.city,
+                state: requestData.state,
+                country: requestData.country,
+            },
+        });
 
+        const existingCard = await Card.findOne({
+            where: {
+                // user_id: authUserId,
+                stripe_card_id: stripeCustomer.default_source,
+                // card_number: requestData.cardNumber,
+            },
+        });
 
+        if (existingCard) {
+            return RESPONSE.error(res, "Card already exists for the user");
+        }
+        const paymentCard = await Card.create({
+            user_id: authUserId,
+            stripe_card_id: stripeCustomer.default_source,
+            card_number: requestData.cardNumber,
+            expiry_month: requestData.expMonth,
+            expiry_year: requestData.expYear,
+            cvc: requestData.cvc,
+            cardholder_name: requestData.cardholderName,
+        });
+        console.log('paymentCard', paymentCard)
+
+        const updatedUser = await Users.update(
+            {
+                stripe_customer_id: stripeCustomer.id,
+                stripe_card_id: stripeCustomer.default_source,
+            },
+            {
+                where: { id: authUserId },
+            }
+        );
         return RESPONSE.success(res, 2401);
     } catch (error) {
         console.log(error)

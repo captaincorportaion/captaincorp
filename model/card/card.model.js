@@ -14,19 +14,7 @@ module.exports = (sequelize, Sequelize) => {
                 key: 'id'
             }
         },
-        card_number: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
-        expiry_month: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
-        expiry_year: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
-        cvc: {
+        stripe_card_id: {
             type: Sequelize.STRING,
             allowNull: false
         },

@@ -71,6 +71,14 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE,
             allowNull: true,
         },
+        stripe_customer_id: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        stripe_card_id: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
         fcm_token: {
             type: Sequelize.STRING(255),
             allowNull: true,
