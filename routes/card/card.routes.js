@@ -7,6 +7,7 @@ const Auth = require('../../middleware/checkAuth');
 const cardController = require('../../controller/card.controller');
 
 router.post('/add-card', Auth.authUser, cardController.addCard)
+router.post('/create-payment', Auth.authUser, cardController.createPayment)
 router.get('/get-card', Auth.authUser, cardController.getCard)//get your all card
 router.delete('/delete-card/:id', Auth.authUser, cardController.deleteCard)
 
