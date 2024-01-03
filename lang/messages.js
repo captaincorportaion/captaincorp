@@ -86,6 +86,7 @@ const MESSAGES = {
     //card
     '2401': 'card added',
     '2402': 'get all cards',
+    '2403': 'payment sucessfully',
 
 }
 

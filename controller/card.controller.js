@@ -38,7 +38,7 @@ const addCard = async (req, res) => {
                 // state: 'gujrat',
                 // country: 'india',
             },
-        }); 
+        });
 
         const existingCard = await Card.findOne({
             where: {
@@ -78,7 +78,7 @@ const addCard = async (req, res) => {
         // });
 
         return RESPONSE.success(res, 2401);  // { clientSecret: setupIntent.client_secret }
-     } catch (error) {
+    } catch (error) {
         console.log(error)
         return RESPONSE.error(res, error.message);
     }
@@ -87,7 +87,7 @@ const addCard = async (req, res) => {
 const createPayment = async (req, res) => {
     try {
         const authUserId = req.user.id;
-        const cardId = req.body.cardId; 
+        const cardId = req.body.cardId;
         const amount = req.body.amount;
 
         // Retrieve the user's Stripe customer ID from your database
@@ -199,20 +199,38 @@ const deleteCard = async (req, res) => {
         return RESPONSE.error(res, error.message);
     }
 }
-
-//get your all card
 // const getCard = async (req, res) => {
 //     try {
 //         const { user: { id } } = req;
-//         const card = await Card.findAll({
+//         const cards = await Card.findAll({
 //             where: { user_id: id }
-//         })
-//         return RESPONSE.success(res, 2402, card);
+//         });
+
+//         if (cards || cards.length === 0) {
+//             const stripeCustomer = await stripe.customers.retrieve(req.user.stripe_customer_id);
+//             if (!stripeCustomer || !stripeCustomer.default_source) {
+//                 return RESPONSE.error(res, "No cards found for the user");
+//             }
+
+//             const cardDetails = await stripe.paymentMethods.retrieve(stripeCustomer.default_source);
+
+//             const { last4 } = cardDetails.card;
+
+//             const responseCard = {
+//                 // cards,
+//                 cardNumber: `${last4}`,
+//             };
+
+//             return RESPONSE.success(res, 2402, responseCard);
+//         }
+
+//         return RESPONSE.success(res, 2402, cards);
 //     } catch (error) {
-//         console.log(error)
+//         console.log(error);
 //         return RESPONSE.error(res, error.message);
 //     }
 // }
+
 const getCard = async (req, res) => {
     try {
         const { user: { id } } = req;
@@ -221,36 +239,36 @@ const getCard = async (req, res) => {
         });
 
         if (!cards || cards.length === 0) {
-            // If no cards are stored in your database, retrieve them from Stripe
-            const stripeCustomer = await stripe.customers.retrieve(req.user.stripe_customer_id);
-            
-            if (!stripeCustomer || !stripeCustomer.default_source) {
-                return RESPONSE.error(res, "No cards found for the user");
-            }
-
-            const cardDetails = await stripe.paymentMethods.retrieve(stripeCustomer.default_source);
-
-            // Extract relevant card details from the Stripe response
-            const { last4, exp_month, exp_year, brand } = cardDetails.card;
-
-            const responseCard = {
-                last4,
-                expMonth: exp_month,
-                expYear: exp_year,
-                brand,
-                cardNumber: `**** **** **** ${last4}`,
-            };
-
-            return RESPONSE.success(res, 2402, responseCard);
+            return RESPONSE.error(res, "No cards found for the user");
         }
 
-        // Cards are already stored in your database, respond with them
-        return RESPONSE.success(res, 2402, cards);
+        const stripeCustomer = await stripe.customers.retrieve(req.user.stripe_customer_id);
+        if (!stripeCustomer || !stripeCustomer.default_source) {
+            return RESPONSE.error(res, "No default card found for the user");
+        }
+
+        const responseCards = [];
+
+        for (const card of cards) {
+            const cardDetails = await stripe.paymentMethods.retrieve(card.stripe_card_id);
+            const { last4, brand } = cardDetails.card;
+
+            const responseCard = {
+                stripe_card_id: card.stripe_card_id,
+                cardNumber: `${last4}`,
+                type: `${brand}`,
+            };
+
+            responseCards.push(responseCard);
+        }
+
+        return RESPONSE.success(res, 2402, responseCards);
     } catch (error) {
         console.log(error);
         return RESPONSE.error(res, error.message);
     }
-}
+};
+
 
 
 module.exports = {
