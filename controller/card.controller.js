@@ -182,14 +182,43 @@ const createPayment = async (req, res) => {
 // };
 
 
+// const deleteCard = async (req, res) => {
+//     try {
+//         const authUser = req.user.id;
+//         const id = req.params.id;
+//         const card = await Card.findOne({ where: { id: id, user_id: authUser } });
+//         if (!card) {
+//             return RESPONSE.error(res, 'card not found');
+//         }
+
+//         const deleteCard = await card.destroy({ where: { id: id } });
+
+//         return RESPONSE.success(res, 1110);
+//     } catch (error) {
+//         console.error(error);
+//         return RESPONSE.error(res, error.message);
+//     }
+// }
+
 const deleteCard = async (req, res) => {
     try {
         const authUser = req.user.id;
         const id = req.params.id;
-        const card = await Card.findOne({ where: { id: id, user_id: authUser } });
+        // Find the card in your database
+        const card = await Card.findOne({ where: { stripe_card_id: id, user_id: authUser } });
         if (!card) {
-            return RESPONSE.error(res, 'card not found');
+            return RESPONSE.error(res, 'Card not found');
         }
+
+        const user = await Users.findOne({ where: { id: authUser } })
+
+        const customerId = user.stripe_customer_id; 
+
+        if (!customerId) {
+            return RESPONSE.error(res, 'Stripe customer ID not found for the card');
+        }
+
+        await stripe.customers.deleteSource(customerId, card.stripe_card_id); 
 
         const deleteCard = await card.destroy({ where: { id: id } });
 
@@ -199,6 +228,8 @@ const deleteCard = async (req, res) => {
         return RESPONSE.error(res, error.message);
     }
 }
+
+
 // const getCard = async (req, res) => {
 //     try {
 //         const { user: { id } } = req;
