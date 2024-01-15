@@ -75,10 +75,6 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: true,
         },
-        stripe_card_id: {
-            type: Sequelize.STRING,
-            allowNull: true,
-        },
         fcm_token: {
             type: Sequelize.STRING(255),
             allowNull: true,

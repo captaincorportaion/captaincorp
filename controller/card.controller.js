@@ -5,84 +5,138 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Card = db.card;
 const Users = db.users;
 
+// const addCard = async (req, res) => {
+//     try {
+//         const requestData = req.body;
+
+//         const authUserId = req.user.id;
+//         const token = requestData.tokenId;
+//         // Your code to create a token
+//         // const token = await stripe.tokens.create({
+//         //     card: {
+//         //         number: requestData.cardNumber,
+//         //         exp_month: requestData.expMonth,
+//         //         exp_year: requestData.expYear,
+//         //         cvc: requestData.cvc,
+//         //     },
+//         // });
+
+//         // Your code to create a customer in Stripe
+//         const stripeCustomer = await stripe.customers.create({
+//             email: req.user.email,
+//             source: token,
+//             name: req.user.name,
+//             address: {
+//                 line1: 'testing for prim',
+//                 postal_code: requestData.zipCode,
+//                 city: requestData.city,
+//                 state: requestData.state,
+//                 country: requestData.country,
+//                 // line1: 'testing for prim',
+//                 // postal_code: '395004',
+//                 // city: 'surat',
+//                 // state: 'gujrat',
+//                 // country: 'india',
+//             },
+//         });
+
+//         const existingCard = await Card.findOne({
+//             where: {
+//                 // user_id: authUserId,
+//                 stripe_card_id: stripeCustomer.default_source,
+//                 // card_number: requestData.cardNumber,
+//             },
+//         });
+
+//         if (existingCard) {
+//             return RESPONSE.error(res, "Card already exists for the user");
+//         }
+//         const paymentCard = await Card.create({
+//             user_id: authUserId,
+//             stripe_card_id: stripeCustomer.default_source,
+//             card_number: requestData.cardNumber,
+//             expiry_month: requestData.expMonth,
+//             expiry_year: requestData.expYear,
+//             cvc: requestData.cvc,
+//             cardholder_name: requestData.cardholderName,
+//         });
+//         // console.log('paymentCard', paymentCard)
+
+//         const updatedUser = await Users.update(
+//             {
+//                 stripe_customer_id: stripeCustomer.id,
+//                 stripe_card_id: stripeCustomer.default_source,
+//             },
+//             {
+//                 where: { id: authUserId },
+//             }
+//         );
+
+//         // const setupIntent = await stripe.setupIntents.create({
+//         //     customer: stripeCustomer.id,
+//         //     usage: 'off_session',
+//         // });
+
+//         return RESPONSE.success(res, 2401);  // { clientSecret: setupIntent.client_secret }
+//     } catch (error) {
+//         console.log(error)
+//         return RESPONSE.error(res, error.message);
+//     }
+// }
+
 const addCard = async (req, res) => {
     try {
         const requestData = req.body;
 
         const authUserId = req.user.id;
         const token = requestData.tokenId;
-        // Your code to create a token
-        // const token = await stripe.tokens.create({
-        //     card: {
-        //         number: requestData.cardNumber,
-        //         exp_month: requestData.expMonth,
-        //         exp_year: requestData.expYear,
-        //         cvc: requestData.cvc,
-        //     },
-        // });
 
-        // Your code to create a customer in Stripe
-        const stripeCustomer = await stripe.customers.create({
-            email: req.user.email,
-            source: token,
-            name: req.user.name,
-            address: {
-                line1: 'testing for prim',
-                postal_code: requestData.zipCode,
-                city: requestData.city,
-                state: requestData.state,
-                country: requestData.country,
-                // line1: 'testing for prim',
-                // postal_code: '395004',
-                // city: 'surat',
-                // state: 'gujrat',
-                // country: 'india',
-            },
+        let stripeCustomer;
+
+        const existingUser = await Users.findOne({
+            where: { id: authUserId },
         });
 
-        const existingCard = await Card.findOne({
-            where: {
-                // user_id: authUserId,
-                stripe_card_id: stripeCustomer.default_source,
-                // card_number: requestData.cardNumber,
-            },
-        });
+        if (existingUser.stripe_customer_id) {
+            stripeCustomer = await stripe.customers.retrieve(existingUser.stripe_customer_id);
+        } else {
+            stripeCustomer = await stripe.customers.create({
+                email: req.user.email,
+                name: req.user.name,
+            });
 
-        if (existingCard) {
-            return RESPONSE.error(res, "Card already exists for the user");
+            await Users.update(
+                {
+                    stripe_customer_id: stripeCustomer.id,
+                },
+                {
+                    where: { id: authUserId },
+                }
+            );
         }
+
+        const addedCard = await stripe.customers.createSource(
+            stripeCustomer.id,
+            { source: token }
+        );
+
         const paymentCard = await Card.create({
             user_id: authUserId,
-            stripe_card_id: stripeCustomer.default_source,
+            stripe_card_id: addedCard.id,
             card_number: requestData.cardNumber,
             expiry_month: requestData.expMonth,
             expiry_year: requestData.expYear,
             cvc: requestData.cvc,
             cardholder_name: requestData.cardholderName,
         });
-        // console.log('paymentCard', paymentCard)
+        // await stripe.customers.update(stripeCustomer.id, { default_source: addedCard.id });
 
-        const updatedUser = await Users.update(
-            {
-                stripe_customer_id: stripeCustomer.id,
-                stripe_card_id: stripeCustomer.default_source,
-            },
-            {
-                where: { id: authUserId },
-            }
-        );
-
-        // const setupIntent = await stripe.setupIntents.create({
-        //     customer: stripeCustomer.id,
-        //     usage: 'off_session',
-        // });
-
-        return RESPONSE.success(res, 2401);  // { clientSecret: setupIntent.client_secret }
+        return RESPONSE.success(res, 2401);
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return RESPONSE.error(res, error.message);
     }
-}
+};
 
 const createPayment = async (req, res) => {
     try {
@@ -151,54 +205,6 @@ const createPayment = async (req, res) => {
     }
 };
 
-// const createPaymentMethod = async (req, res) => {
-//     try {
-//         const requestData = req.body;
-//         const authUserId = req.user.id;
-//         const token = requestData.tokenId;
-//         // Create a Payment Method using the Stripe API
-//         const paymentMethod = await stripe.paymentMethods.create({
-//             type: 'card',
-//             source: token,
-//             card: {
-//                 token: requestData.token, // Use the token generated by Stripe.js
-//             },
-
-//         });
-
-//         // Attach the Payment Method to the customer (assumes you have a Stripe customer ID in your Users model)
-//         const user = await Users.findByPk(authUserId);
-//         const customerID = user.stripe_customer_id;
-
-//         await stripe.paymentMethods.attach(paymentMethod.id, {
-//             customer: customerID,
-//         });
-
-//         return RESPONSE.success(res, 2402, { paymentMethodId: paymentMethod.id });
-//     } catch (error) {
-//         console.error(error);
-//         return RESPONSE.error(res, error.message);
-//     }
-// };
-
-
-// const deleteCard = async (req, res) => {
-//     try {
-//         const authUser = req.user.id;
-//         const id = req.params.id;
-//         const card = await Card.findOne({ where: { id: id, user_id: authUser } });
-//         if (!card) {
-//             return RESPONSE.error(res, 'card not found');
-//         }
-
-//         const deleteCard = await card.destroy({ where: { id: id } });
-
-//         return RESPONSE.success(res, 1110);
-//     } catch (error) {
-//         console.error(error);
-//         return RESPONSE.error(res, error.message);
-//     }
-// }
 
 const deleteCard = async (req, res) => {
     try {
@@ -212,13 +218,14 @@ const deleteCard = async (req, res) => {
 
         const user = await Users.findOne({ where: { id: authUser } })
 
-        const customerId = user.stripe_customer_id; 
+        const customerId = user.stripe_customer_id;
 
         if (!customerId) {
             return RESPONSE.error(res, 'Stripe customer ID not found for the card');
         }
 
-        await stripe.customers.deleteSource(customerId, card.stripe_card_id); 
+        const deleteCard1 = await stripe.customers.deleteSource(customerId, card.stripe_card_id);
+        console.log('deleteCard1', deleteCard1)
 
         const deleteCard = await card.destroy({ where: { id: id } });
 
@@ -226,6 +233,7 @@ const deleteCard = async (req, res) => {
     } catch (error) {
         console.error(error);
         return RESPONSE.error(res, error.message);
+
     }
 }
 
@@ -274,7 +282,9 @@ const getCard = async (req, res) => {
         }
 
         const stripeCustomer = await stripe.customers.retrieve(req.user.stripe_customer_id);
-        if (!stripeCustomer || !stripeCustomer.default_source) {
+        // console.log('req.user.stripe_customer_id', req.user.stripe_customer_id)
+        if (!stripeCustomer) {
+            // console.log('stripeCustomer', stripeCustomer.default_source)
             return RESPONSE.error(res, "No default card found for the user");
         }
 
