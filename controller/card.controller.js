@@ -225,7 +225,7 @@ const deleteCard = async (req, res) => {
         }
 
         const deleteCard1 = await stripe.customers.deleteSource(customerId, card.stripe_card_id);
-        console.log('deleteCard1', deleteCard1)
+        // console.log('deleteCard1', deleteCard1)
 
         const deleteCard = await card.destroy({ where: { id: id } });
 
