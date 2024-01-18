@@ -416,17 +416,6 @@ async function socketEvent(io) {
                     }
                 });
 
-
-                // Add a check for undefined conversation
-                // if (!conversation) {
-                //     console.error('Conversation not found');
-                //     return;
-                // }
-
-                // console.log('conversations_id:', data.conversations_id);
-                console.log('authUser.userId:', data.authUser.userId);
-                console.log('receiver_id:', data.receiver_id);
-
                 const conversationId = conversation.id;
 
                 if (findOnscreen.length > 0) {
