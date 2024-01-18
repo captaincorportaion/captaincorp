@@ -17,5 +17,6 @@ router.patch('/notifications-update', checkAuth.authUser, notificationController
 
 //chat
 router.get('/get-chat', checkAuth.authUser, chatController.getChatById);
+router.post('/update-msgcount', checkAuth.authUser, chatController.createOrUpdateMsgCount);
 
 module.exports = router;

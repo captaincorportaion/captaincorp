@@ -78,6 +78,7 @@ db.card = require('../model/card/card.model')(sequelize, Sequelize);
 //chat
 db.conversations = require('../model/chat/conversations.model')(sequelize, Sequelize);
 db.conversations_chat = require('../model/chat/conversations_chat.model')(sequelize, Sequelize);
+db.msg_count_converastion = require('../model/chat/message_count.model')(sequelize, Sequelize);
 //..........................relation................................
 
 // db.rooms.hasMany(db.room_amenities, { foreignKey: 'amenitieId' });

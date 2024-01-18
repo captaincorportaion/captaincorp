@@ -8,7 +8,7 @@ const Users = db.users;
 const UserSession = db.user_sessions;
 const Conversations = db.conversations;
 const Conversations_chats = db.conversations_chat;
-
+const msg_count_converastions = db.msg_count_converastion;
 
 let users = [];
 
@@ -76,11 +76,82 @@ const createMessage = async (data) => {
             message: data.message
         })
 
+        // const receiverOnScreen = data.isOnScreen || false; // Assuming isOnScreen is a boolean in data
+        // await createOrUpdateMsgCount(authUser.userId, data.receiverId, receiverOnScreen);
         return message
     } catch (error) {
         console.log(error);
     }
 }
+
+//message count conversation 
+// const createOrUpdateMsgCount = async (req, res) => {
+//     try {
+//         const authUser = req.user.id;
+//         // console.log('authUser', authUser)
+//         // Check if entry exists
+//         const { body: { receiverId, isOnScreen } } = req
+//         let msgCountEntry = await msg_count_converastions.findAll({
+//             where: {
+//                 user_id: authUser,
+//                 receiver_id: receiverId,
+//             }
+//         });
+
+//         if (!msgCountEntry) {
+//             // Create new entry
+//             msgCountEntry = await msg_count_converastions.create({
+//                 user_id: authUser,
+//                 receiver_id: receiverId,
+//                 is_onscreen: isOnScreen,
+//             });
+//             // console.log('msgCountEntry', msgCountEntry)
+//         } else {
+//             // Update existing entry
+//             await msgCountEntry.update({
+//                 is_onscreen: isOnScreen,
+//             });
+//         }
+
+//         return msgCountEntry;
+//     } catch (error) {
+//         console.log(error);
+//     }
+// };
+
+
+const createOrUpdateMsgCount = async (req, res) => {
+    try {
+        const authUser = req.user.id;
+        const { body: { receiverId, isOnScreen } } = req;
+
+        // Check if entry exists
+        let msgCountEntry = await msg_count_converastions.findAll({
+            where: {
+                user_id: authUser,
+                receiver_id: receiverId,
+            }
+        });
+
+        if (msgCountEntry.length === 0) {
+            // Create new entry
+            msgCountEntry = await msg_count_converastions.create({
+                user_id: authUser,
+                receiver_id: receiverId,
+                is_onscreen: isOnScreen,
+            });
+        } else {
+            // Update existing entry
+            await msgCountEntry[0].update({
+                is_onscreen: isOnScreen,
+            });
+        }
+
+        return RESPONSE.success(res, "Successfully", msgCountEntry)
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 //................Get conversations
 const getConversations = async (data) => {
@@ -182,7 +253,7 @@ const getChatById = async (req, res) => {
                 ]
             },
         });
-        
+
         if (!findConversation) {
             return RESPONSE.error(res, 1014);
         }
@@ -238,14 +309,154 @@ async function socketEvent(io) {
             const senders = getUser(data.authUser.userId);
             const receivers = getUser(data.receiver_id);
             const message = await createMessage(data);
+            senders.map(async (sender) => {
+                // const findOnscreen = msg_count_converastions.findAll({
+                //     where: {
+                //         receiver_id: senders,
+                //         user_id: receivers,
+                //         is_onscreen: true
 
-            senders.map(sender => {
+                //     }
+                // })
+
+                // if (findOnscreen) {
+                //     const updateStatus = Conversations_chats.update({
+                //         where: {
+                //             status: "read"
+                //         }
+                //     })
+                // } else {
+                //     const updateStatus = Conversations_chats.update({
+                //         where: {
+                //             status: "sent"
+                //         }
+                //     })
+                // }
+
                 io.to(sender.socketId).emit('getMessage', message)
             });
 
-            receivers.map(receiver => {
-                io.to(receiver.socketId).emit('getMessage', message)
+            // receivers.map(async (receiver) => {
+            //     const findOnscreen = await msg_count_converastions.findAll({
+            //         where: {
+            //             receiver_id: data.authUser.userId,
+            //             user_id: receiver.userId,
+            //             is_onscreen: true
+            //         }
+            //     });
+            //     // console.log('findOnscreen', findOnscreen)
+
+            //     const conversation = await Conversations.findOne({
+            //         where: {
+            //             [Op.or]: [
+            //                 { id: data.conversations_id },
+            //                 { sender_id: data.authUser.userId, receiver_id: data.receiver_id },
+            //                 { sender_id: data.receiver_id, receiver_id: data.authUser.userId }
+            //             ]
+            //         }
+            //     });
+            //     console.log('conversations_id:', data.conversations_id);
+            //     console.log('authUser.userId:', data.authUser.userId);
+            //     console.log('receiver_id:', data.receiver_id);
+
+            //     const conversationId = conversation.id;
+
+
+
+            //     if (findOnscreen.length > 0) {
+            //         const updateStatus = Conversations_chats.update(
+            //             { status: "Read" },
+            //             {
+            //                 where: {
+            //                     // receiver_id: data.authUser.userId,
+            //                     user_id: receiver.userId,
+            //                 }
+            //             }
+
+            //         );
+            //         console.log('updateStatusqq', updateStatus)
+
+            //     } else {
+            //         const updateStatus = Conversations_chats.update(
+            //             { status: "Sent" },
+            //             {
+            //                 where: {
+            //                     // receiver_id: data.authUser.userId,
+            //                     user_id: receiver.userId,
+            //                 }
+            //             }
+
+            //         );
+            //         // console.log('updateStatus', updateStatus)
+            //     }
+
+            //     io.to(receiver.socketId).emit('getMessage', message)
+            // });
+            receivers.map(async (receiver) => {
+                const findOnscreen = await msg_count_converastions.findAll({
+                    where: {
+                        receiver_id: data.authUser.userId,
+                        user_id: receiver.userId,
+                        is_onscreen: true
+                    }
+                });
+
+                // Check if data.conversations_id is defined
+                // if (typeof data.conversations_id === 'undefined') {
+                //     console.error('data.conversations_id is undefined');
+                //     return;
+                // }
+                const conversation = await Conversations.findOne({
+                    where: {
+                        [Op.or]: [
+                            // { id: data.conversations_id },
+                            { sender_id: data.authUser.userId, receiver_id: data.receiver_id },
+                            { sender_id: data.receiver_id, receiver_id: data.authUser.userId }
+                        ]
+                    }
+                });
+
+
+                // Add a check for undefined conversation
+                // if (!conversation) {
+                //     console.error('Conversation not found');
+                //     return;
+                // }
+
+                // console.log('conversations_id:', data.conversations_id);
+                console.log('authUser.userId:', data.authUser.userId);
+                console.log('receiver_id:', data.receiver_id);
+
+                const conversationId = conversation.id;
+
+                if (findOnscreen.length > 0) {
+                    const updateStatus = await Conversations_chats.update(
+                        { status: "Read" },
+                        {
+                            where: {
+                                sender_id: data.authUser.userId,
+                                // user_id: receiver.userId,
+                            }
+                        }
+                    );
+                    console.log('updateStatusqq', updateStatus);
+                } else {
+                    const updateStatus = await Conversations_chats.update(
+                        { status: "Sent" },
+                        {
+                            where: {
+                                sender_id: data.authUser.userId,
+                                // user_id: receiver.userId,
+                            }
+                        }
+                    );
+                    // console.log('updateStatus', updateStatus)
+                }
+
+                io.to(receiver.socketId).emit('getMessage', message);
             });
+
+
             const authUser = data.authUser;
             const conversationExists = await Conversations.findAll({
                 where: {
@@ -264,6 +475,7 @@ async function socketEvent(io) {
                 });
 
                 receivers.forEach(async (receiver) => {
+                    // await createOrUpdateMsgCount(data.receiverId, receiver.userId, data.isOnScreen || false);
                     const receiverData = {
                         authUser: {
                             userId: receiver.userId
@@ -297,5 +509,6 @@ async function socketEvent(io) {
 module.exports = {
     socketEvent,
     socketAuth,
-    getChatById
+    getChatById,
+    createOrUpdateMsgCount
 }
