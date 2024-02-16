@@ -64,6 +64,8 @@ const signUp = async (req, res) => {
             name: 'required',
             email: 'required',
             password: 'required',
+            fcm_token: 'required',
+            fcm_token_type: 'required',
             dob: 'required'
         });
 
@@ -71,7 +73,7 @@ const signUp = async (req, res) => {
             firstMessage = Object.keys(validation.errors.all())[0];
             return RESPONSE.error(res, validation.errors.first(firstMessage), '', 400);
         }
-        const { name, email, password, dob, fcm_token } = req.body;
+        const { name, email, password, dob, fcm_token, fcm_token_type } = req.body;
 
         const existingUser = await Users.findOne({ where: { email: email } });
 
@@ -86,6 +88,7 @@ const signUp = async (req, res) => {
             email,
             password: hashedPassword,
             fcm_token,
+            fcm_token_type,
             dob
         });
 
@@ -95,6 +98,7 @@ const signUp = async (req, res) => {
             newUser.token = userToken;
             delete newUser.password;
             delete newUser.fcm_token;
+            delete newUser.fcm_token_type;
 
             const addUser = {
                 newUser,
@@ -112,14 +116,16 @@ const login = async (req, res) => {
     try {
         let validation = new Validator(req.body, {
             emailOrPhoneNumber: 'required',
-            password: 'required'
+            password: 'required',
+            // fcm_token: 'required',
+            // fcm_token_type: 'required'
         });
 
         if (validation.fails()) {
             firstMessage = Object.keys(validation.errors.all())[0];
             return RESPONSE.error(res, validation.errors.first(firstMessage), '', 400);
         }
-        const { emailOrPhoneNumber, password } = req.body;
+        const { emailOrPhoneNumber, password, fcm_token, fcm_token_type } = req.body;
 
         let userIsExist = await Users.findOne({
             where: {
@@ -137,9 +143,17 @@ const login = async (req, res) => {
 
         if (userIsExist != null && bcrypt.compareSync(password, userIsExist.password)) {
             userIsExist = userIsExist.toJSON();
-            userIsExist.token = await UserSession.createToken(userIsExist.id);
+            const token = await UserSession.createToken(userIsExist.id);
             delete userIsExist.password;
-            return RESPONSE.success(res, 1002, userIsExist);
+            // userIsExist.fcm_token = fcm_token;
+            // userIsExist.fcm_token_type = fcm_token_type;
+            const finduser = await Users.update({
+                fcm_token: fcm_token,
+                fcm_token_type: fcm_token_type
+            }, {
+                where: { id: userIsExist.id }
+            });
+            return RESPONSE.success(res, 1002, { token });
         } else {
             return RESPONSE.error(res, 1005)
         }

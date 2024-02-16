@@ -1,6 +1,7 @@
 const Validator = require("validatorjs");
 const db = require('../config/db.config');
 const { authUser } = require("../middleware/checkAuth");
+const { sendNotification } = require("../helpers/firebase")
 
 
 
@@ -272,32 +273,92 @@ const updateNotification = async (req, res) => {
         const authUser = req.user;
 
         if (type == "Room") {
-            const findData = await Room_booking.findOne({ where: { id: id, status: "Pending" } });
-
+            const findData = await Room_booking.findOne({
+                where: { id, status: "Pending" }, include: {
+                    model: User,
+                    as: 'user',
+                }
+            });
+            console.log('findData===============', findData)
             if (!findData) {
                 return RESPONSE.error(res, 1012);
             }
 
             await Room_booking.update({ status: status }, { where: { id: findData.id } });
 
-        } else if (type == "Roommate") {
-            const findData = await Roommate_booking.findOne({ where: { id: id, status: "Pending" } });
+            if (status === 'Accept') {
 
+                const notificationData = {
+                    title: "Room Booking Notification",
+                    body: `Your room booking has been accepted.`
+                };
+                await sendNotification(findData, notificationData);
+            } else {
+
+                const notificationData = {
+                    title: "Room Booking Notification",
+                    body: `Your room booking has been rejected.`
+                };
+                const token = findData.user.fcm_token;
+                await sendNotification(req, token, notificationData);
+            }
+
+        } else if (type == "Roommate") {
+            const findData = await Roommate_booking.findOne({
+                where: { id, status: "Pending" }, include: {
+                    model: User,
+                    as: 'user',
+                }
+            });
             if (!findData) {
                 return RESPONSE.error(res, 1012);
             }
 
             await Roommate_booking.update({ status: status }, { where: { id: findData.id } });
-
+            if (status === 'Accept') {
+                const notificationData = {
+                    title: "Roommate Booking Notification",
+                    body: `Your roommate booking has been accepted.`
+                };
+                const token = findData.user.fcm_token;
+                await sendNotification(token, notificationData);
+            } else {
+                const notificationData = {
+                    title: "Roommate Booking Notification",
+                    body: `Your roommate booking has been rejected.`
+                };
+                const token = findData.user.fcm_token;
+                await sendNotification(token, notificationData);
+            }
         } else {
 
-            const findData = await Rent_item_booking.findOne({ where: { id: id, status: "Pending" } });
-
+            const findData = await Rent_item_booking.findOne({
+                where: { id, status: "Pending" }, include: {
+                    model: User,
+                    as: 'user',
+                }
+            });
             if (!findData) {
                 return RESPONSE.error(res, 1012);
             }
 
             await Rent_item_booking.update({ status: status }, { where: { id: findData.id } });
+
+            if (status === 'Accept') {
+                const notificationData = {
+                    title: "Rent Item Booking Notification",
+                    body: `Your rent item booking has been accepted.`
+                };
+                const token = findData.user.fcm_token;
+                await sendNotification(req, token, notificationData);
+            } else {
+                const notificationData = {
+                    title: "Rent Item Booking Notification",
+                    body: `Your rent item booking has been rejected.`
+                };
+                const token = findData.user.fcm_token;
+                await sendNotification(token, notificationData);
+            }
         }
 
         return RESPONSE.success(res, 1011);

@@ -11,6 +11,7 @@ const path = require('path')
 const { Server } = require('socket.io')
 const socketController = require('./controller/chat.controller.js')
 const fs = require("fs");
+const { sendNotification } = require("./helpers/firebase.js")
 
 app.use(upload.any())
 app.use(cors());
@@ -22,9 +23,25 @@ app.use(express.static(path.join(__dirname, 'public')))
 //user routes
 const userRoutes = require('./routes/index.js')
 app.use('/api/v1', userRoutes);
-app.get('/',(req,res)=>{
-    res.json({status:true,message:"App running!"})
+app.get('/', (req, res) => {
+    res.json({ status: true, message: "App running!" })
 })
+
+//send notification
+// app.get("/send-notification", async (req, res) => {
+//     const notificationData = {
+//         title: "Test App Notification",
+//         body: "This is Testing"
+//     };
+//     const token = "dwwI80kpsUBaoK25ywXyTq:APA91bHgXOAsWmXb8NfMdHxtlzDUewI6kdOUlLq1zt0kdF5lQWFWzz53fTccN0mPzkxQ1AIdXwtHe0JIyA5ZmKgd2yUPTXLNjti6t_wTH_KBjT7FOkpUW3_GN7dSzrV0VrSI6_vNmwHK";
+//     const send = await sendNotification(token, notificationData).then((response) => {
+//         console.log("Sent");
+//         return res.status(200).json("Sent");
+//     }).catch((err) => {
+//         console.log(err);
+//         return res.status(500);
+//     })
+// })
 
 
 //Server
