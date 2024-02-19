@@ -117,8 +117,8 @@ const login = async (req, res) => {
         let validation = new Validator(req.body, {
             emailOrPhoneNumber: 'required',
             password: 'required',
-            // fcm_token: 'required',
-            // fcm_token_type: 'required'
+            fcm_token: 'required',
+            fcm_token_type: 'required'
         });
 
         if (validation.fails()) {
