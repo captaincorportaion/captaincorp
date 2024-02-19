@@ -2,7 +2,7 @@ const Validator = require("validatorjs");
 const db = require('../config/db.config');
 const { Op } = require('sequelize')
 const randomstring = require('randomstring')
-
+const { sendNotification } = require("../helpers/firebase")
 
 //...................models............
 const Roommate = db.roommate;

@@ -2,7 +2,7 @@ const Validator = require("validatorjs");
 const db = require('../config/db.config');
 const { UploadFiles } = require('../helpers/file')
 const { Op, sequelize } = require('sequelize')
-
+const { sendNotification } = require("../helpers/firebase")
 
 //...................models............
 const Event_categories = db.event_categories;
