@@ -16,138 +16,6 @@ const Rooms = db.rooms
 const Roommate = db.roommate
 
 
-
-
-
-//................get All  notification .....................
-// const notification = async (req, res) => {
-//     try {
-//         // const { request, id, type } = req.query;
-
-//         const authUser = req.user;
-
-//         let conditionOffset = {};
-//         // Pagination
-//         const page = Number(req.query.page) || 1;
-//         const limit = Number(req.query.limit);
-//         const offset = (page - 1) * limit;
-
-//         if (limit && page) {
-//             conditionOffset.limit = limit;
-//             conditionOffset.offset = offset;
-//         }
-
-//         const findItem = await Rent_item_booking.findAndCountAll({
-//             where: { status: "Pending" },
-//             include: [
-//                 {
-//                     model: User,
-//                     attributes: ['id', 'name', 'picture']
-//                 },
-//                 {
-//                     model: Items,
-//                     attributes: ['id', 'user_id', 'title', 'description'],
-//                     where: { user_id: authUser.id },
-//                 },
-
-//             ],
-//             order: [['createdAt', 'DESC']],
-//             ...conditionOffset,
-
-//         });
-
-
-//         const findRoom = await Room_booking.findAndCountAll({
-//             where: { status: 'Pending' },
-//             include: [
-//                 {
-//                     model: User,
-//                     attributes: ['id', 'name', 'picture']
-//                 },
-//                 {
-//                     model: Rooms,
-//                     attributes: ['id', 'user_id', 'title', 'description'],
-//                     where: { user_id: authUser.id }
-//                 },
-
-
-//             ],
-//             order: [['createdAt', 'DESC']],
-//             ...conditionOffset
-//         });
-
-
-
-//         const findRoommate = await Roommate_booking.findAndCountAll({
-//             where: { status: 'Pending' },
-//             include: [
-//                 {
-//                     model: User,
-//                     attributes: ['id', 'name', 'picture']
-//                 },
-//                 {
-//                     model: Roommate,
-//                     attributes: ['id', 'user_id'],
-//                     where: { user_id: authUser.id }
-//                 },
-
-//             ],
-//             order: [['createdAt', 'DESC']],
-//             ...conditionOffset
-//         })
-
-//         // Add a 'type' field to distinguish the notification type
-//         const itemNotifications = findItem.rows.map(notification => ({
-//             type: 'Item',
-//             ...notification.toJSON()
-//         }));
-//         const roomNotifications = findRoom.rows.map(notification => ({
-//             type: 'Room',
-//             ...notification.toJSON()
-//         }));
-//         const roommateNotifications = findRoommate.rows.map(notification => ({
-//             type: 'Roommate',
-//             ...notification.toJSON()
-//         }));
-
-//         const data = [...itemNotifications, ...roomNotifications, ...roommateNotifications];
-//         const totalCount = findItem.count + findRoom.count + findRoommate.count;
-
-//         // const data = [...findItem.rows, ...findRoom.rows, ...findRoommate.rows];
-//         // const totalCount = findItem.count + findRoom.count + findRoommate.count;
-
-
-//         // let responseData = {
-//         //     data: data,
-//         //     page_information: {
-//         //         totalrecords: totalCount,
-//         //         lastpage: Math.ceil(totalCount / (limit * 3)),
-//         //         currentpage: page,
-//         //         previouspage: 0 + (page - 1),
-//         //         nextpage: page < Math.ceil(totalCount / (limit * 3)) ? page + 1 : 0
-//         //     },
-//         //     type: findRoom.count > 0 ? "room" : undefined
-//         // };
-//         let responseData = {
-//             data: data,
-//             page_information: {
-//                 totalrecords: totalCount,
-//                 lastpage: Math.ceil(totalCount / limit), // Calculate last page based on the provided limit
-//                 currentpage: page,
-//                 previouspage: page > 1 ? page - 1 : 0,
-//                 nextpage: page < Math.ceil(totalCount / limit) ? page + 1 : 0,
-//             },
-//         };
-
-//         return RESPONSE.success(res, 1010, responseData);
-
-//     } catch (error) {
-//         console.log(error);
-//         return RESPONSE.error(res, error.message);
-//     }
-// }
-
-
 const notification = async (req, res) => {
     try {
         const authUser = req.user;
@@ -279,7 +147,6 @@ const updateNotification = async (req, res) => {
                     as: 'user',
                 }
             });
-            console.log('findData===============', findData)
             if (!findData) {
                 return RESPONSE.error(res, 1012);
             }
@@ -299,8 +166,7 @@ const updateNotification = async (req, res) => {
                     title: "Room Booking Notification",
                     body: `Your room booking has been rejected.`
                 };
-                const token = findData.user.fcm_token;
-                await sendNotification(req, token, notificationData);
+                await sendNotification(findData, notificationData);
             }
 
         } else if (type == "Roommate") {
@@ -320,15 +186,13 @@ const updateNotification = async (req, res) => {
                     title: "Roommate Booking Notification",
                     body: `Your roommate booking has been accepted.`
                 };
-                const token = findData.user.fcm_token;
-                await sendNotification(token, notificationData);
+                await sendNotification(findData, notificationData);
             } else {
                 const notificationData = {
                     title: "Roommate Booking Notification",
                     body: `Your roommate booking has been rejected.`
                 };
-                const token = findData.user.fcm_token;
-                await sendNotification(token, notificationData);
+                await sendNotification(findData, notificationData);
             }
         } else {
 
@@ -349,15 +213,13 @@ const updateNotification = async (req, res) => {
                     title: "Rent Item Booking Notification",
                     body: `Your rent item booking has been accepted.`
                 };
-                const token = findData.user.fcm_token;
-                await sendNotification(req, token, notificationData);
+                await sendNotification(req, findData, notificationData);
             } else {
                 const notificationData = {
                     title: "Rent Item Booking Notification",
                     body: `Your rent item booking has been rejected.`
                 };
-                const token = findData.user.fcm_token;
-                await sendNotification(token, notificationData);
+                await sendNotification(findData, notificationData);
             }
         }
 

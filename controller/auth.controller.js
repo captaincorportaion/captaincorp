@@ -6,58 +6,10 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer')
 const { Sequelize, Op } = require('sequelize');
 const Users = db.users;
-// const config = db.configs;
 const config = require('../config/config')
 
 const UserSession = db.user_sessions;
-// const jwt = require('jsonwebtoken');
 
-// const signUp = async (req, res) => {
-//     try {
-//         let validation = new Validator(req.body, {
-//             name: 'required',
-//             email: 'required',
-//             password: 'required',
-//         });
-
-//         if (validation.fails()) {
-//             firstMessage = Object.keys(validation.errors.all())[0];
-//             return RESPONSE.error(res, validation.errors.first(firstMessage), '', 400);
-//         }
-//         const { name, email, password } = req.body;
-
-//         const existingUser = await Users.findOne({ where: { email: email } });
-
-//         if (existingUser) {
-//             return RESPONSE.error(res, 1003);
-//         }
-
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         const newUser = await Users.create({
-//             name,
-//             email,
-//             password: hashedPassword,
-//         });
-//         let userToken;
-//         if (newUser) {
-//             newUser = newUser.toJSON();
-//             userToken = await UserSession.createToken(newUser.id);
-//         }
-
-//         const addUser = {
-//             newUser: {
-//                 ...newUser,
-//                 token: userToken,
-//             },
-//         }
-
-//         return RESPONSE.success(res, 1001, addUser);
-//     } catch (error) {
-//         console.log(error)
-//         return RESPONSE.error(res, error.message);
-//     }
-// }
 const signUp = async (req, res) => {
     try {
         let validation = new Validator(req.body, {
@@ -145,8 +97,6 @@ const login = async (req, res) => {
             userIsExist = userIsExist.toJSON();
             const token = await UserSession.createToken(userIsExist.id);
             delete userIsExist.password;
-            // userIsExist.fcm_token = fcm_token;
-            // userIsExist.fcm_token_type = fcm_token_type;
             const finduser = await Users.update({
                 fcm_token: fcm_token,
                 fcm_token_type: fcm_token_type

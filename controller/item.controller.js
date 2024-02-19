@@ -412,7 +412,12 @@ const bookingRentItem = async (req, res) => {
             return RESPONSE.error(res, 2107)
         }
 
-        const findItem = await Items.findOne({ where: { id: item_id, item_type: 'Rent' } });
+        const findItem = await Items.findOne({
+            where: { id: item_id, item_type: 'Rent' }, include: {
+                model: Users,
+                as: 'user',
+            }
+        });
 
         if (!findItem) {
             return RESPONSE.error(res, 1105)
@@ -422,7 +427,13 @@ const bookingRentItem = async (req, res) => {
         total = total * rent_time;
 
         const bookingItem = await Rent_item_booking.create({ item_id, user_id: authUser.id, rent_time, total_price: total });
-
+        if (bookingItem) {
+            const notificationData = {
+                title: "Item Booking Notification",
+                body: `${findItem.user.name} has requesting to book your item.`
+            };
+            await sendNotification(findItem, notificationData);
+        }
         return RESPONSE.success(res, 2106, bookingItem);
     } catch (error) {
         console.log(error)

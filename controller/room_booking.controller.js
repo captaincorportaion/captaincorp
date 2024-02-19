@@ -1,11 +1,14 @@
 const Validator = require('validatorjs');
 const db = require("../config/db.config");
 const { Op } = require('sequelize')
+const { sendNotification } = require("../helpers/firebase")
+
 
 
 //...................models............
 const Room = db.rooms;
 const Room_booking = db.room_booking
+const User = db.users
 
 //..................... booking roommate ...................
 
@@ -39,8 +42,12 @@ const bookingRoom = async (req, res) => {
         if (isExist.length) {
             return RESPONSE.error(res, 1111)
         }
-        const findData = await Room.findOne({ where: { id: room_id } });
-
+        const findData = await Room.findOne({
+            where: { id: room_id }, include: {
+                model: User,
+                as: 'user',
+            }
+        });
         if (!findData) {
             await trans.rollback();
             return RESPONSE.error(res, 1105);
@@ -52,6 +59,13 @@ const bookingRoom = async (req, res) => {
         }
 
         const bookingRoom = await Room_booking.create({ date, minimum_stay, user_id: authUser.id, room_id: findData.id }, { transaction: trans })
+        if (bookingRoom) {
+            const notificationData = {
+                title: "Room Booking Notification",
+                body: `${findData.user.name} has requesting to book your room.`
+            };
+            await sendNotification(findData, notificationData);
+        }
 
         await trans.commit();
         return RESPONSE.success(res, 1106, bookingRoom);

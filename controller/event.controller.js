@@ -181,7 +181,7 @@ const updateEvent = async (req, res) => {
                 responseData.event_photos.push(eventPhoto);
             }
         }
-        
+
         return RESPONSE.success(res, 2009);
     } catch (error) {
         console.log(error)
@@ -281,7 +281,12 @@ const eventBooking = async (req, res) => {
             return RESPONSE.error(res, 2107)
         }
 
-        const findEvent = await Event.findOne({ where: { id: event_id } });
+        const findEvent = await Event.findOne({
+            where: { id: event_id }, include: {
+                model: Users,
+                as: 'user',
+            }
+        });
 
         if (!findEvent) {
             await trans.rollback();
@@ -294,7 +299,13 @@ const eventBooking = async (req, res) => {
         }
 
         const eventBooking = await Event_booking.create({ user_id: authUser.id, event_id: findEvent.id, participants }, { transaction: trans });
-
+        if (eventBooking) {
+            const notificationData = {
+                title: "Event Booking Notification",
+                body: `${findEvent.user.name} has requesting to book your event.`
+            };
+            await sendNotification(findEvent, notificationData);
+        }
         await trans.commit();
         return RESPONSE.success(res, 2006, eventBooking);
     } catch (error) {

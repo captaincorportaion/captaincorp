@@ -647,7 +647,12 @@ const bookingRoommate = async (req, res) => {
             return RESPONSE.error(res, 2303)
         }
 
-        const findRoommateData = await Roommate.findOne({ where: { id: roommate_id } });
+        const findRoommateData = await Roommate.findOne({
+            where: { id: roommate_id }, include: {
+                model: Users,
+                as: 'user',
+            }
+        });
 
         if (!findRoommateData) {
             await trans.rollback();
@@ -660,7 +665,13 @@ const bookingRoommate = async (req, res) => {
         }
 
         const bookingData = await Roommate_booking.create({ date, minimum_stay, age, user_id: authUser.id, roommate_id: findRoommateData.id }, { transaction: trans })
-
+        if (bookingData) {
+            const notificationData = {
+                title: "Roommate Booking Notification",
+                body: `${findRoommateData.user.name} has requesting to book your roommate.`
+            };
+            await sendNotification(findRoommateData, notificationData);
+        }
         await trans.commit();
         return RESPONSE.success(res, 2301, bookingData);
     } catch (error) {

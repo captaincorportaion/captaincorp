@@ -55,9 +55,6 @@ const fireAuth = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
-const db = require("../config/db.config");
-const User = db.users;
-
 const sendNotification = async (userData, notification) => {
     try {
         if (!userData.user || !userData.user.id) {
@@ -67,7 +64,6 @@ const sendNotification = async (userData, notification) => {
         let message;
 
         if (userData.user.fcm_token_type == "1") {
-            console.log("androd");
             message = {
                 data: {
                     title: notification.title,
