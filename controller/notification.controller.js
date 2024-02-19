@@ -213,7 +213,7 @@ const updateNotification = async (req, res) => {
                     title: "Rent Item Booking Notification",
                     body: `Your rent item booking has been accepted.`
                 };
-                await sendNotification(req, findData, notificationData);
+                await sendNotification(findData, notificationData);
             } else {
                 const notificationData = {
                     title: "Rent Item Booking Notification",
