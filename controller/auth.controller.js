@@ -103,7 +103,7 @@ const login = async (req, res) => {
             }, {
                 where: { id: userIsExist.id }
             });
-            return RESPONSE.success(res, 1002, { token });
+            return RESPONSE.success(res, 1002, { userIsExist, token });
         } else {
             return RESPONSE.error(res, 1005)
         }
