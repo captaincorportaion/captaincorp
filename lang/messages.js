@@ -18,6 +18,7 @@ const MESSAGES = {
     '1016': "get profile successfully",
     '1017': "Incorrect OTP",
     '1018': "Otp verify successfully",
+    '1019': "Account deleted successfully",
 
     //ROOM
     '1101': "Added room successfully",

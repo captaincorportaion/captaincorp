@@ -298,7 +298,6 @@ const deleteAccount = async (req, res) => {
     try {
         const { user: { id } } = req
         const user = await Users.findByPk(id);
-        console.log('user', user)
         if (!user) {
             return RESPONSE.error(res, 1004);
         }
@@ -307,10 +306,9 @@ const deleteAccount = async (req, res) => {
         await Roommate.destroy({ where: { user_id: user.id } });
         await Event.destroy({ where: { user_id: user.id } });
 
-        user.deletedAt = new Date();
-        await user.save();
+        await Users.destroy({ where: { id: user.id } });
 
-        return RESPONSE.success(res, 200, 'Account deleted successfully');
+        return RESPONSE.success(res, 1019);
 
     } catch (error) {
         console.log(error);
