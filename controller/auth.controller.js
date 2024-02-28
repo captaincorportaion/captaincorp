@@ -6,6 +6,9 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer')
 const { Sequelize, Op } = require('sequelize');
 const Users = db.users;
+const Room = db.rooms;
+const Roommate = db.roommate;
+const Event = db.event;
 const config = require('../config/config')
 
 const UserSession = db.user_sessions;
@@ -97,6 +100,8 @@ const login = async (req, res) => {
             userIsExist = userIsExist.toJSON();
             const token = await UserSession.createToken(userIsExist.id);
             delete userIsExist.password;
+            delete userIsExist.fcm_token;
+            delete userIsExist.fcm_token_type;
             const finduser = await Users.update({
                 fcm_token: fcm_token,
                 fcm_token_type: fcm_token_type
@@ -272,7 +277,6 @@ const updateProfile = async (req, res) => {
         return RESPONSE.error(res, error.message);
     }
 }
-
 const getProfile = async (req, res) => {
     try {
         const { user: { id } } = req
@@ -290,7 +294,32 @@ const getProfile = async (req, res) => {
     }
 }
 
+const deleteAccount = async (req, res) => {
+    try {
+        const { user: { id } } = req
+        const user = await Users.findByPk(id);
+        console.log('user', user)
+        if (!user) {
+            return RESPONSE.error(res, 1004);
+        }
 
-module.exports = { signUp, login, forgotPassword, resetPassword, updateProfile, getProfile, verifyOtp };
+        await Room.destroy({ where: { user_id: user.id } });
+        await Roommate.destroy({ where: { user_id: user.id } });
+        await Event.destroy({ where: { user_id: user.id } });
+
+        user.deletedAt = new Date();
+        await user.save();
+
+        return RESPONSE.success(res, 200, 'Account deleted successfully');
+
+    } catch (error) {
+        console.log(error);
+        return RESPONSE.error(res, error.message);
+    }
+};
+
+
+
+module.exports = { signUp, login, forgotPassword, resetPassword, updateProfile, getProfile, verifyOtp, deleteAccount };
 
 

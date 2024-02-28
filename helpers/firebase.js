@@ -80,8 +80,7 @@ const sendNotification = async (userData, notification) => {
                 token: userData.user.fcm_token,
             };
         }
-        const response = await admin.messaging().send(message);
-
+        const response = await fireAuth.messaging().send(message);
         console.log('Successfully sent notification:', response);
     } catch (error) {
         console.error('Error sending notification:', error);
