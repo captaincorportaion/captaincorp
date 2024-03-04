@@ -67,7 +67,7 @@ const addRoommate = async (req, res) => {
         monthly_rent: 'required|numeric',
         minimum_stay: 'required|numeric',
         bathrooms: 'required|numeric',
-        age: 'required|numeric',
+        age: 'required',
         bedrooms: 'required|numeric',
         no_of_roommates: 'required|numeric',
         marital_status: 'required|in:Single,Married',
@@ -359,7 +359,7 @@ const getAllRoommate = async (req, res) => {
         return RESPONSE.error(res, validation.errors.first(firstMessage))
     }
     try {
-        const { city, age, minimum_stay, min_budget, max_budget, bedrooms, bathrooms, no_of_roommates, gender, food_choice, lifestyle } = req.query;
+        const { city, preference_age, age, minimum_stay, min_budget, max_budget, bedrooms, bathrooms, no_of_roommates, gender, food_choice, lifestyle } = req.query;
         const { user: { id } } = req;
         let condition = {}
         let lifeStyleCondition = {}
@@ -367,9 +367,12 @@ const getAllRoommate = async (req, res) => {
         if (city) {
             condition.city = city;
         }
-        if (age) {
-            const [min_age, max_age] = age.split('-')
-            condition.age = { [Op.gte]: min_age, [Op.lte]: max_age };
+        // if (age) {
+        //     const [min_age, max_age] = age.split('-')
+        //     condition.age = { [Op.gte]: min_age, [Op.lte]: max_age };
+        // }
+        if (preference_age) {
+            condition.preference_age = preference_age;
         }
         if (minimum_stay) {
             condition.minimum_stay = minimum_stay;
