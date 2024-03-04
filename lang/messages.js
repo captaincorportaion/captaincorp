@@ -89,6 +89,11 @@ const MESSAGES = {
     '2402': 'get all cards',
     '2403': 'payment sucessfully',
 
+    //history
+    '2501': 'get all purchase and history',
+    '2502': 'update status sucessfully',
+
+
 }
 
 module.exports.getMessage = function (messageCode) {

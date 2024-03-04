@@ -29,5 +29,9 @@ router.use('/post', savePostRoutes);
 const cardRoutes = require('./card/card.routes');
 router.use('/card', cardRoutes);
 
+//history
+const historyRoutes = require('./history/history.routes');
+router.use('/history', historyRoutes);
+
 
 module.exports = router;

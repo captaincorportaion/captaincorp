@@ -160,6 +160,7 @@ const updateNotification = async (req, res) => {
                     body: `Your room booking has been accepted.`
                 };
                 await sendNotification(findData, notificationData);
+
             } else {
 
                 const notificationData = {
@@ -187,6 +188,7 @@ const updateNotification = async (req, res) => {
                     body: `Your roommate booking has been accepted.`
                 };
                 await sendNotification(findData, notificationData);
+                // await Roommate_booking.update({ status: 'confirm' }, { where: { id: findData.id } });
             } else {
                 const notificationData = {
                     title: "Roommate Booking Notification",
