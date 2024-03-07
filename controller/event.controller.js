@@ -359,10 +359,14 @@ const getAllEvents = async (req, res) => {
     try {
         const { user: { id } } = req;
         const authUser = req.user;
+        const today = new Date();
         const findEvent = await Event.findAll({
             where: {
                 user_id: {
                     [Op.ne]: id
+                },
+                date: {
+                    [Op.gte]: today // Filter out events with a date greater than or equal to today
                 }
             },
             include: [
