@@ -14,8 +14,8 @@ const Users = db.users;
 //         // Your code to create a token
 //         // const token = await stripe.tokens.create({
 //         //     card: {
-//         //         number: requestData.cardNumber,
-//         //         exp_month: requestData.expMonth,
+//         //         number: reqta.cardNumber,
+//         //         exp_month: requestDuestDaata.expMonth,
 //         //         exp_year: requestData.expYear,
 //         //         cvc: requestData.cvc,
 //         //     },
@@ -90,7 +90,30 @@ const addCard = async (req, res) => {
 
         const authUserId = req.user.id;
         const token = requestData.tokenId;
+        // Your code to create a token
 
+        // const token = await stripe.tokens.create({
+        //     card: {
+        //         number: requestData.cardNumber,
+        //         exp_month: requestData.expMonth,
+        //         exp_year: requestData.expYear,
+        //         cvc: requestData.cvc,
+        //     },
+        //     // card: {
+        //     //     number: requestData.cardNumber,
+        //     //     exp_month: requestData.expMonth,
+        //     //     exp_year: requestData.expYear,
+        //     //     cvc: requestData.cvc,
+        //     //     address_city: "surat",
+        //     //     address_country: "india",
+        //     //     address_line1: "bhavana soc,lalita chowkdi",
+        //     //     address_line2: "bhavana soc,lalita chowkdi",
+        //     //     address_state: "gujrat",
+        //     //     address_zip: 395004,
+        //     //     name: "prince",
+        //     // },
+        // });
+        // console.log("token", token);
         let stripeCustomer;
 
         const existingUser = await Users.findOne({
@@ -103,6 +126,15 @@ const addCard = async (req, res) => {
             stripeCustomer = await stripe.customers.create({
                 email: req.user.email,
                 name: req.user.name,
+                address: {
+                    line1: req.user.address,
+                    postal_code: req.user.postal_code,
+                    city: req.user.city,
+                    state: req.user.state,
+                    country: req.user.country,
+                },
+                // name: 'Jenny Rosen',
+                // email: 'jennyrosen@example.com',
             });
 
             await Users.update(
@@ -144,25 +176,13 @@ const createPayment = async (req, res) => {
         const cardId = req.body.cardId;
         const amount = req.body.amount;
 
-        // Retrieve the user's Stripe customer ID from your database
         const user = await Users.findByPk(authUserId);
         const customerID = user.stripe_customer_id;
-        // const setupIntentConfirmation = await stripe.setupIntents.confirm(
-        //     req.body.setupIntentClientSecret,
-        //     { payment_method: cardId }
-        // );
+
         // Create a PaymentIntent
         const paymentIntent = await stripe.paymentIntents.create({
-            // amount: amount,
-            // currency: 'usd',
-            // customer: customerID,
-            // payment_method: cardId,
-            // off_session: true,
-            // confirm: true,
-            // description:"testing",
-            // customer:"cus_PDoidR16F235NF"
             amount: amount,
-            currency: 'inr',
+            currency: 'usd',
             customer: customerID,
             payment_method: cardId,
             off_session: true,
@@ -171,18 +191,15 @@ const createPayment = async (req, res) => {
             shipping: {
                 name: req.user.name,
                 address: {
-                    line1: 'testing for prim',
-                    postal_code: req.body.zipCode,
-                    city: req.body.city,
-                    state: req.body.state,
-                    country: req.body.country,
+                    line1: req.user.address,
+                    postal_code: req.user.postal_code,
+                    city: req.user.city,
+                    state: req.user.state,
+                    country: req.user.country,
                 },
             },
         });
-        // if (paymentIntent.currency !== 'inr' && req.body.country === 'IN') {
-        //     return RESPONSE.error(res, "Non-INR transactions in India should have shipping/billing address outside Indiaaaaa");
-        // }
-        // Handle the PaymentIntent status
+
         if (paymentIntent.status === 'succeeded') {
             // Payment succeeded, you can save the payment details in your database
             const paymentDetails = {
@@ -192,7 +209,6 @@ const createPayment = async (req, res) => {
                 payment_intent_id: paymentIntent.id,
                 payment_status: paymentIntent.status,
             };
-            // YourPaymentModel.create(paymentDetails);
             return RESPONSE.success(res, 2403, paymentIntent); // You can define your success response accordingly
         }
         //  else {

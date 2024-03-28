@@ -27,6 +27,22 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BIGINT(20),
             allowNull: true,
         },
+        postal_code: {
+            type: Sequelize.STRING(200),
+            allowNull: true,
+        },
+        city: {
+            type: Sequelize.STRING(200),
+            allowNull: true,
+        },
+        state: {
+            type: Sequelize.STRING(200),
+            allowNull: true,
+        },
+        country: {
+            type: Sequelize.STRING(200),
+            allowNull: true,
+        },
         classYear: {
             type: Sequelize.BIGINT(20),
             allowNull: true,
