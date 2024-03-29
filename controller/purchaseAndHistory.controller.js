@@ -5,6 +5,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Card = db.card;
 const Users = db.users;
 const Rent_item_booking = db.rent_item_booking;
+const Sale_item_booking = db.sale_item_booking;
 const Room_booking = db.room_booking
 const Roommate_booking = db.roommate_booking;
 const Event_booking = db.event_booking;
@@ -36,7 +37,7 @@ const updateStatusafterPaymentData = async (req, res) => {
     let validation = new Validator(req.query, {
         status: 'required|in:confirm',
         id: 'required',
-        type: 'required|in:Room,Roommate,Item,Event'
+        type: 'required|in:Room,Roommate,saleItem,Event'
     });
     if (validation.fails()) {
         firstMessage = Object.keys(validation.errors.all())[0];
@@ -73,7 +74,7 @@ const updateStatusafterPaymentData = async (req, res) => {
 
             await Roommate_booking.update({ status: status }, { where: { id: findData.id } });
 
-        } else if (type == "Item") {
+        } else if (type == "rentItem") {
 
             const findData = await Rent_item_booking.findOne({
                 where: { id, status: "Pending" }, include: {
@@ -87,6 +88,18 @@ const updateStatusafterPaymentData = async (req, res) => {
 
             await Rent_item_booking.update({ status: status }, { where: { id: findData.id } });
 
+        } else if (type == "saleItem") {
+            const findData = await Sale_item_booking.findOne({
+                where: { id, status: "Pending" }, include: {
+                    model: User,
+                    as: 'user',
+                }
+            });
+            if (!findData) {
+                return RESPONSE.error(res, 1012);
+            }
+
+            await Sale_item_booking.update({ status: status }, { where: { id: findData.id } });
         } else {
             const findData = await Event_booking.findOne({
                 where: { id, status: "Pending" }, include: {
@@ -221,6 +234,25 @@ const updateStatusafterPayment = async (req, res) => {
                 }
             ]
         });
+        const saleItemData = await Sale_item_booking.findAll({
+            where: { user_id: id, status: "confirm" }, include: [
+                {
+                    model: Item,
+                    as: 'item',
+                    include: [
+                        {
+                            model: Items_photos,
+                            attributes: ['photo', 'id']
+                        },
+                        {
+                            model: Item_categories,
+                            attributes: ['name', 'id']
+                        },
+                    ],
+
+                }
+            ]
+        });
         const EventData = await Event_booking.findAll({
             where: { user_id: id, status: "confirm" }, include: [
                 {
@@ -250,7 +282,7 @@ const updateStatusafterPayment = async (req, res) => {
             ]
         });
 
-        const response = { RoomData, RoommateData, ItemData, EventData }
+        const response = { RoomData, RoommateData, ItemData, EventData, saleItemData }
 
         return RESPONSE.success(res, 2501, response);
     } catch (error) {
