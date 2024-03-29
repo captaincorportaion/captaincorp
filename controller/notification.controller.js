@@ -97,7 +97,7 @@ const notification = async (req, res) => {
                 },
                 {
                     model: Event,
-                    attributes: ['id', 'user_id', 'title', 'event_details'],
+                    attributes: ['id', 'user_id', 'event_title', 'event_details'],
                     where: { user_id: authUser.id }
                 },
             ],
@@ -126,11 +126,11 @@ const notification = async (req, res) => {
 
         const data = [
             ...rentItemNotifications.rows.map(notification => ({
-                type: 'Item',
+                type: 'rentItem',
                 ...notification.toJSON()
             })),
             ...saleItemNotifications.rows.map(notification => ({
-                type: 'Item',
+                type: 'saleItem',
                 ...notification.toJSON()
             })),
             ...roomNotifications.rows.map(notification => ({
