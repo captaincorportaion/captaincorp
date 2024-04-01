@@ -5,84 +5,6 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Card = db.card;
 const Users = db.users;
 
-// const addCard = async (req, res) => {
-//     try {
-//         const requestData = req.body;
-
-//         const authUserId = req.user.id;
-//         const token = requestData.tokenId;
-//         // Your code to create a token
-//         // const token = await stripe.tokens.create({
-//         //     card: {
-//         //         number: reqta.cardNumber,
-//         //         exp_month: requestDuestDaata.expMonth,
-//         //         exp_year: requestData.expYear,
-//         //         cvc: requestData.cvc,
-//         //     },
-//         // });
-
-//         // Your code to create a customer in Stripe
-//         const stripeCustomer = await stripe.customers.create({
-//             email: req.user.email,
-//             source: token,
-//             name: req.user.name,
-//             address: {
-//                 line1: 'testing for prim',
-//                 postal_code: requestData.zipCode,
-//                 city: requestData.city,
-//                 state: requestData.state,
-//                 country: requestData.country,
-//                 // line1: 'testing for prim',
-//                 // postal_code: '395004',
-//                 // city: 'surat',
-//                 // state: 'gujrat',
-//                 // country: 'india',
-//             },
-//         });
-
-//         const existingCard = await Card.findOne({
-//             where: {
-//                 // user_id: authUserId,
-//                 stripe_card_id: stripeCustomer.default_source,
-//                 // card_number: requestData.cardNumber,
-//             },
-//         });
-
-//         if (existingCard) {
-//             return RESPONSE.error(res, "Card already exists for the user");
-//         }
-//         const paymentCard = await Card.create({
-//             user_id: authUserId,
-//             stripe_card_id: stripeCustomer.default_source,
-//             card_number: requestData.cardNumber,
-//             expiry_month: requestData.expMonth,
-//             expiry_year: requestData.expYear,
-//             cvc: requestData.cvc,
-//             cardholder_name: requestData.cardholderName,
-//         });
-//         // console.log('paymentCard', paymentCard)
-
-//         const updatedUser = await Users.update(
-//             {
-//                 stripe_customer_id: stripeCustomer.id,
-//                 stripe_card_id: stripeCustomer.default_source,
-//             },
-//             {
-//                 where: { id: authUserId },
-//             }
-//         );
-
-//         // const setupIntent = await stripe.setupIntents.create({
-//         //     customer: stripeCustomer.id,
-//         //     usage: 'off_session',
-//         // });
-
-//         return RESPONSE.success(res, 2401);  // { clientSecret: setupIntent.client_secret }
-//     } catch (error) {
-//         console.log(error)
-//         return RESPONSE.error(res, error.message);
-//     }
-// }
 
 const addCard = async (req, res) => {
     try {
@@ -90,30 +12,7 @@ const addCard = async (req, res) => {
 
         const authUserId = req.user.id;
         const token = requestData.tokenId;
-        // Your code to create a token
-
-        // const token = await stripe.tokens.create({
-        //     card: {
-        //         number: requestData.cardNumber,
-        //         exp_month: requestData.expMonth,
-        //         exp_year: requestData.expYear,
-        //         cvc: requestData.cvc,
-        //     },
-        //     // card: {
-        //     //     number: requestData.cardNumber,
-        //     //     exp_month: requestData.expMonth,
-        //     //     exp_year: requestData.expYear,
-        //     //     cvc: requestData.cvc,
-        //     //     address_city: "surat",
-        //     //     address_country: "india",
-        //     //     address_line1: "bhavana soc,lalita chowkdi",
-        //     //     address_line2: "bhavana soc,lalita chowkdi",
-        //     //     address_state: "gujrat",
-        //     //     address_zip: 395004,
-        //     //     name: "prince",
-        //     // },
-        // });
-        // console.log("token", token);
+        
         let stripeCustomer;
 
         const existingUser = await Users.findOne({
@@ -133,8 +32,6 @@ const addCard = async (req, res) => {
                     state: req.user.state,
                     country: req.user.country,
                 },
-                // name: 'Jenny Rosen',
-                // email: 'jennyrosen@example.com',
             });
 
             await Users.update(
@@ -161,7 +58,6 @@ const addCard = async (req, res) => {
             cvc: requestData.cvc,
             cardholder_name: requestData.cardholderName,
         });
-        // await stripe.customers.update(stripeCustomer.id, { default_source: addedCard.id });
 
         return RESPONSE.success(res, 2401);
     } catch (error) {
@@ -200,6 +96,7 @@ const createPayment = async (req, res) => {
             },
         });
 
+        
         if (paymentIntent.status === 'succeeded') {
             // Payment succeeded, you can save the payment details in your database
             const paymentDetails = {
@@ -211,10 +108,6 @@ const createPayment = async (req, res) => {
             };
             return RESPONSE.success(res, 2403, paymentIntent); // You can define your success response accordingly
         }
-        //  else {
-        //     // Payment failed, handle the error
-        //     return RESPONSE.error(res, `Payment failed: ${paymentIntent.last_payment_error ? paymentIntent.last_payment_error.message : 'Unknown error'}`);
-        // }
     } catch (error) {
         console.error(error);
         return RESPONSE.error(res, error.message);
@@ -253,38 +146,6 @@ const deleteCard = async (req, res) => {
     }
 }
 
-
-// const getCard = async (req, res) => {
-//     try {
-//         const { user: { id } } = req;
-//         const cards = await Card.findAll({
-//             where: { user_id: id }
-//         });
-
-//         if (cards || cards.length === 0) {
-//             const stripeCustomer = await stripe.customers.retrieve(req.user.stripe_customer_id);
-//             if (!stripeCustomer || !stripeCustomer.default_source) {
-//                 return RESPONSE.error(res, "No cards found for the user");
-//             }
-
-//             const cardDetails = await stripe.paymentMethods.retrieve(stripeCustomer.default_source);
-
-//             const { last4 } = cardDetails.card;
-
-//             const responseCard = {
-//                 // cards,
-//                 cardNumber: `${last4}`,
-//             };
-
-//             return RESPONSE.success(res, 2402, responseCard);
-//         }
-
-//         return RESPONSE.success(res, 2402, cards);
-//     } catch (error) {
-//         console.log(error);
-//         return RESPONSE.error(res, error.message);
-//     }
-// }
 
 const getCard = async (req, res) => {
     try {
