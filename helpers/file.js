@@ -8,7 +8,7 @@ function imageUpload(fileObjArray, pathFolder = "room_image") {
     let imagearr = [];
     for (let index = 0, len = fileObjArray.length; index < len; ++index) {
         if (fileObjArray[index].fieldname === "mediaImg") {
-            console.log('fileObjArray[index]', fileObjArray[index])
+            // console.log('fileObjArray[index]', fileObjArray[index])
             const image = uid(16) + path.extname(fileObjArray[index].originalname);
             const uploadPath = "./public/" + pathFolder + "/" + image;
             if (!fs.existsSync('./public/' + pathFolder)) {
