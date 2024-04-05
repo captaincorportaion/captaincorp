@@ -27,7 +27,6 @@ app.get('/', (req, res) => {
     res.json({ status: true, message: "App running!" })
 })
 
-
 //send notification
 // app.get("/send-notification", async (req, res) => {
 //     const notificationData = {
