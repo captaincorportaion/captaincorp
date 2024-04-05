@@ -7,7 +7,7 @@ module.exports = {
     database: {
         database: process.env.DB_DATABASE || 'captaincorportaion',
         username: process.env.DB_USERNAME || 'captaincorporationadm',
-        password: process.env.DB_PASSWORD || '',
+        password: process.env.DB_PASSWORD || 'YesYouCan007@#ashtag123',
         host: process.env.DB_HOST || 'captaincorp.mysql.database.azure.com',
         dialect: process.env.DB_DIALECT || 'mysql',
     },
