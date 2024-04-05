@@ -35,7 +35,7 @@ const Items_photos = db.item_photos;
 
 const updateStatusafterPaymentData = async (req, res) => {
     let validation = new Validator(req.query, {
-        status: 'required|in:confirm',
+        status: 'required|in:Accept',
         id: 'required',
         type: 'required|in:Room,Roommate,saleItem,Event'
     });
@@ -127,7 +127,7 @@ const updateStatusafterPayment = async (req, res) => {
     try {
         const { user: { id } } = req;
         const RoomData = await Room_booking.findAll({
-            where: { user_id: id, status: "confirm" }, include: [
+            where: { user_id: id, status: "Accept" }, include: [
                 {
                     model: Room,
                     as: 'room',
@@ -166,7 +166,7 @@ const updateStatusafterPayment = async (req, res) => {
         }
         );
         const RoommateData = await Roommate_booking.findAll({
-            where: { user_id: id, status: "confirm" }, include: [
+            where: { user_id: id, status: "Accept" }, include: [
                 {
                     model: Roommate,
                     as: 'roommate',
@@ -216,7 +216,7 @@ const updateStatusafterPayment = async (req, res) => {
             ]
         });
         const ItemData = await Rent_item_booking.findAll({
-            where: { user_id: id, status: "confirm" }, include: [
+            where: { user_id: id, status: "Accept" }, include: [
                 {
                     model: Item,
                     as: 'item',
@@ -235,7 +235,7 @@ const updateStatusafterPayment = async (req, res) => {
             ]
         });
         const saleItemData = await Sale_item_booking.findAll({
-            where: { user_id: id, status: "confirm" }, include: [
+            where: { user_id: id, status: "Accept" }, include: [
                 {
                     model: Item,
                     as: 'item',
@@ -254,7 +254,7 @@ const updateStatusafterPayment = async (req, res) => {
             ]
         });
         const EventData = await Event_booking.findAll({
-            where: { user_id: id, status: "confirm" }, include: [
+            where: { user_id: id, status: "Accept" }, include: [
                 {
                     model: Event,
                     as: 'event',
