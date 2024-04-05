@@ -10,12 +10,12 @@ const sequelize = new Sequelize(config.database.database, config.database.userna
         acquire: 30000,
         idle: 10000
     },
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false
-        }
-    },
+    // dialectOptions: {
+    //     ssl: {
+    //         require: true,
+    //         rejectUnauthorized: false
+    //     }
+    // },
     logging: false
 });
 
