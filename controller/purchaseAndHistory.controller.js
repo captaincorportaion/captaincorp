@@ -37,7 +37,7 @@ const updateStatusafterPaymentData = async (req, res) => {
     let validation = new Validator(req.query, {
         status: 'required|in:Accept',
         id: 'required',
-        type: 'required|in:Room,Roommate,saleItem,Event'
+        type: 'required|in:Room,Roommate,saleItem,rentItem,Event'
     });
     if (validation.fails()) {
         firstMessage = Object.keys(validation.errors.all())[0];
