@@ -175,7 +175,7 @@ const updateNotification = async (req, res) => {
   let validation = new Validator(req.query, {
     status: "required|in:Decline,Accept",
     id: "required",
-    type: "required|in:Room,Roommate,rentItem",
+    type: "required|in:Room,Roommate,saleItem,rentItem,Event",
   });
   if (validation.fails()) {
     firstMessage = Object.keys(validation.errors.all())[0];
@@ -276,7 +276,7 @@ const updateNotification = async (req, res) => {
         };
         await sendNotification(findData, notificationData);
       }
-    } else {
+    } else if (type == "saleItem") {
       const findData = await Sale_item_booking.findOne({
         where: { id, status: "Pending" },
         include: {
@@ -303,6 +303,36 @@ const updateNotification = async (req, res) => {
         const notificationData = {
           title: "Sale Item Booking Notification",
           body: `Your Sale item booking has been rejected.`,
+        };
+        await sendNotification(findData, notificationData);
+      }
+    } else if (type == "Event") {
+      const findData = await Event_booking.findOne({
+        where: { id, status: "Pending" },
+        include: {
+          model: User,
+          as: "user",
+        },
+      });
+      if (!findData) {
+        return RESPONSE.error(res, 1012);
+      }
+
+      await Event_booking.update(
+        { status: status },
+        { where: { id: findData.id } }
+      );
+
+      if (status === "Accept") {
+        const notificationData = {
+          title: "Event Booking Notification",
+          body: `Your event booking has been accepted.`,
+        };
+        await sendNotification(findData, notificationData);
+      } else {
+        const notificationData = {
+          title: "Event Booking Notification",
+          body: `Your event booking has been rejected.`,
         };
         await sendNotification(findData, notificationData);
       }
