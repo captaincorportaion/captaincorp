@@ -1,7 +1,7 @@
-const Validator = require('validatorjs');
+const Validator = require("validatorjs");
 const db = require("../config/db.config");
-const { where } = require('sequelize');
-// const db = require('../models'); 
+const { where } = require("sequelize");
+// const db = require('../models');
 const Users = db.users;
 const Save = db.saves;
 const Room = db.rooms;
@@ -30,94 +30,116 @@ const Items_photos = db.item_photos;
 
 //add save post
 const savePost = async (req, res) => {
-    try {
-        const { user: { id }, body: { roomId, eventId, roommateId, itemId } } = req;
+  try {
+    const {
+      user: { id },
+      body: { roomId, eventId, roommateId, itemId },
+    } = req;
 
-        if (roomId) {
+    if (roomId) {
+      const existingSavedRoom = await Save.findOne({
+        where: { user_id: id, roomId },
+      });
 
-            const existingSavedRoom = await Save.findOne({ where: { user_id: id, roomId } });
-
-            if (existingSavedRoom) {
-                const post = await Save.destroy({ where: { user_id: id, roomId } });
-                const posts = {
-                    post,
-                    isSaved: false
-                }
-                return RESPONSE.success(res, 1201, posts);
-            } else {
-                const post = await Save.create({ user_id: id, roomId, post_category: "Room" });
-                const posts = {
-                    post,
-                    isSaved: true
-                }
-                return RESPONSE.success(res, 1204, posts);
-            }
-
-        }
-        if (eventId) {
-
-            const existingSavedEvent = await Save.findOne({ where: { user_id: id, eventId } });
-
-            if (existingSavedEvent) {
-                const post = await Save.destroy({ where: { user_id: id, eventId } });
-                const posts = {
-                    post,
-                    isSaved: false
-                }
-                return RESPONSE.success(res, 1205, posts);
-            } else {
-                const post = await Save.create({ user_id: id, eventId, post_category: "Event" });
-                const posts = {
-                    post,
-                    isSaved: true
-                }
-                return RESPONSE.success(res, 1206, posts);
-            }
-        }
-        if (roommateId) {
-
-            const existingSavedRoommte = await Save.findOne({ where: { user_id: id, roommateId } });
-
-            if (existingSavedRoommte) {
-                const post = await Save.destroy({ where: { user_id: id, roommateId } });
-                const posts = {
-                    post,
-                    isSaved: false
-                }
-                return RESPONSE.success(res, 1207, posts);
-            } else {
-                const post = await Save.create({ user_id: id, roommateId, post_category: "Roommate" });
-                const posts = {
-                    post,
-                    isSaved: true
-                }
-                return RESPONSE.success(res, 1208, posts);
-            }
-        }
-        if (itemId) {
-            const existingSavedItem = await Save.findOne({ where: { user_id: id, itemId } });
-
-            if (existingSavedItem) {
-                const post = await Save.destroy({ where: { user_id: id, itemId } });
-                const posts = {
-                    post,
-                    isSaved: false
-                }
-                return RESPONSE.success(res, 1209, posts);
-            } else {
-                const post = await Save.create({ user_id: id, itemId, post_category: "Item" });
-                const posts = {
-                    post,
-                    isSaved: true
-                }
-                return RESPONSE.success(res, 1210, posts);
-            }
-        }
-
-    } catch (error) {
-        console.log(error)
-        return RESPONSE.error(res, error.message);
+      if (existingSavedRoom) {
+        const post = await Save.destroy({ where: { user_id: id, roomId } });
+        const posts = {
+          post,
+          isSaved: false,
+        };
+        return RESPONSE.success(res, 1201, posts);
+      } else {
+        const post = await Save.create({
+          user_id: id,
+          roomId,
+          post_category: "Room",
+        });
+        const posts = {
+          post,
+          isSaved: true,
+        };
+        return RESPONSE.success(res, 1204, posts);
+      }
     }
+    if (eventId) {
+      const existingSavedEvent = await Save.findOne({
+        where: { user_id: id, eventId },
+      });
+
+      if (existingSavedEvent) {
+        const post = await Save.destroy({ where: { user_id: id, eventId } });
+        const posts = {
+          post,
+          isSaved: false,
+        };
+        return RESPONSE.success(res, 1205, posts);
+      } else {
+        const post = await Save.create({
+          user_id: id,
+          eventId,
+          post_category: "Event",
+        });
+        const posts = {
+          post,
+          isSaved: true,
+        };
+        return RESPONSE.success(res, 1206, posts);
+      }
+    }
+    if (roommateId) {
+      const existingSavedRoommte = await Save.findOne({
+        where: { user_id: id, roommateId },
+      });
+
+      if (existingSavedRoommte) {
+        const post = await Save.destroy({ where: { user_id: id, roommateId } });
+        const posts = {
+          post,
+          isSaved: false,
+        };
+        return RESPONSE.success(res, 1207, posts);
+      } else {
+        const post = await Save.create({
+          user_id: id,
+          roommateId,
+          post_category: "Roommate",
+        });
+        const posts = {
+          post,
+          isSaved: true,
+        };
+        return RESPONSE.success(res, 1208, posts);
+      }
+    }
+    if (itemId) {
+      const existingSavedItem = await Save.findOne({
+        where: { user_id: id, itemId },
+      });
+
+      if (existingSavedItem) {
+        const post = await Save.destroy({ where: { user_id: id, itemId } });
+        const posts = {
+          post,
+          isSaved: false,
+        };
+        return RESPONSE.success(res, 1209, posts);
+      } else {
+        const post = await Save.create({
+          user_id: id,
+          itemId,
+          post_category: "Item",
+        });
+        const posts = {
+          post,
+          isSaved: true,
+        };
+        return RESPONSE.success(res, 1210, posts);
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    return RESPONSE.error(res, error.message);
+  }
 };
 
 // const savePost = async (req, res) => {
@@ -183,144 +205,141 @@ const savePost = async (req, res) => {
 //     }
 // };
 
-
-
 const getSavePost = async (req, res) => {
-    try {
-        const { user: { id } } = req;
-        const post = await Save.findAll({
-            where: { user_id: id },
-            include: [
+  try {
+    const {
+      user: { id },
+    } = req;
+    const post = await Save.findAll({
+      where: { user_id: id },
+      include: [
+        {
+          model: Room,
+          as: "room",
+          include: [
+            {
+              model: Media,
+              as: "media",
+            },
+            {
+              model: RoomAmenitie,
+              as: "roomAmenities",
+              include: [
                 {
-                    model: Room,
-                    as: 'room',
-                    include: [
-                        {
-                            model: Media,
-                            as: 'media',
-                        },
-                        {
-                            model: RoomAmenitie,
-                            as: 'roomAmenities',
-                            include: [
-                                {
-                                    model: Houseamenities,
-                                    as: 'houseamenitie'
-                                }
-                            ]
-                        },
-                        {
-                            model: RoomRules,
-                            as: 'roomRules',
-                            include: [
-                                {
-                                    model: Houserules,
-                                    as: 'houserules'
-                                }
-                            ]
-                        },
-                    ]
+                  model: Houseamenities,
+                  as: "houseamenitie",
                 },
+              ],
+            },
+            {
+              model: RoomRules,
+              as: "roomRules",
+              include: [
                 {
-                    model: Event,
-                    as: 'event',
-                    include: [
-                        {
-                            model: Event_photos,
-                            attributes: ['photo', 'id']
-                        },
-                        {
-                            model: Event_categories,
-                            attributes: ['name', 'id']
-                        },
-                        {
-                            model: Selected_amenities,
-                            attributes: ['event_amenities_id', 'id'],
-                            include: [
-                                {
-                                    model: Event_amenities,
-                                    attributes: ['name', 'id']
-                                }
-                            ]
-                        }
-                    ],
-
+                  model: Houserules,
+                  as: "houserules",
                 },
+              ],
+            },
+          ],
+        },
+        {
+          model: Event,
+          as: "event",
+          include: [
+            {
+              model: Event_photos,
+              attributes: ["photo", "id"],
+            },
+            {
+              model: Event_categories,
+              attributes: ["name", "id"],
+            },
+            {
+              model: Selected_amenities,
+              attributes: ["event_amenities_id", "id"],
+              include: [
                 {
-                    model: Roommate,
-                    as: 'roommate',
-                    include: [
-                        {
-                            model: Roommate_media,
-                            attributes: ['media', 'id']
-                        },
-                        {
-                            model: Users,
-                            attributes: ['name', 'picture']
-                        },
-                        {
-                            model: SelectedInterest,
-                            attributes: ['interest_id', 'id'],
-                            include: [
-                                {
-                                    model: Roommate_interests,
-                                    attributes: ['name', 'id']
-                                }
-                            ],
-                        },
-
-                        {
-                            model: SelectedSocial,
-                            attributes: ['social_id', 'id'],
-                            include: [
-                                {
-                                    model: Roommate_social,
-                                    attributes: ['name', 'id']
-                                }
-                            ],
-                        },
-                        {
-                            model: SelectedLifestyle,
-                            attributes: ['lifestyle_id', 'id'],
-                            as: 'selectedLifestyles',
-                            include: [
-                                {
-                                    model: Lifestyle,
-                                    attributes: ['name', 'id']
-                                }
-                            ],
-                        },
-                    ],
+                  model: Event_amenities,
+                  attributes: ["name", "id"],
                 },
+              ],
+            },
+          ],
+        },
+        {
+          model: Roommate,
+          as: "roommate",
+          include: [
+            {
+              model: Roommate_media,
+              attributes: ["media", "id"],
+            },
+            {
+              model: Users,
+              attributes: ["name", "picture"],
+            },
+            {
+              model: SelectedInterest,
+              attributes: ["interest_id", "id"],
+              include: [
                 {
-                    model: Item,
-                    as: 'item',
-                    include: [
-                        {
-                            model: Items_photos,
-                            attributes: ['photo', 'id']
-                        },
-                        {
-                            model: Item_categories,
-                            attributes: ['name', 'id']
-                        },
-                    ],
+                  model: Roommate_interests,
+                  attributes: ["name", "id"],
+                },
+              ],
+            },
 
-                }
-            ],
-        })
+            {
+              model: SelectedSocial,
+              attributes: ["social_id", "id"],
+              include: [
+                {
+                  model: Roommate_social,
+                  attributes: ["name", "id"],
+                },
+              ],
+            },
+            {
+              model: SelectedLifestyle,
+              attributes: ["lifestyle_id", "id"],
+              as: "selectedLifestyles",
+              include: [
+                {
+                  model: Lifestyle,
+                  attributes: ["name", "id"],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: Item,
+          as: "item",
+          include: [
+            {
+              model: Items_photos,
+              attributes: ["photo", "id"],
+            },
+            {
+              model: Item_categories,
+              attributes: ["name", "id"],
+            },
+          ],
+        },
+      ],
+    });
 
-        if (!post.length) {
-            return RESPONSE.error(res, 1203);
-        }
-        // console.log(req.user.id);
-        // console.log(post);
-        return RESPONSE.success(res, 1202, post);
-    } catch (error) {
-        console.log(error)
-        return RESPONSE.error(res, error.message);
+    if (!post.length) {
+      return RESPONSE.error(res, 1203);
     }
+    // console.log(req.user.id);
+    // console.log(post);
+    return RESPONSE.success(res, 1202, post);
+  } catch (error) {
+    console.log(error);
+    return RESPONSE.error(res, error.message);
+  }
 };
 
-
-module.exports = { savePost, getSavePost }
+module.exports = { savePost, getSavePost };
